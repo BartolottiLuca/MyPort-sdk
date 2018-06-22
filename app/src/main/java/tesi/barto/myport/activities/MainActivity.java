@@ -1,0 +1,88 @@
+package tesi.barto.myport.activities;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+
+import tesi.barto.myport.R;
+import tesi.barto.myport.controller.IController;
+import tesi.barto.myport.controller.MyController;
+import tesi.barto.myport.model.services.AbstractService;
+import tesi.barto.myport.model.services.ServiceProva;
+import tesi.barto.myport.model.users.IUser;
+
+import java.io.IOException;
+import java.util.Date;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private Button mEnterButton;
+	private IController controller;
+	private IUser user;
+	private AbstractService serviceProva;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        mEnterButton = (Button) findViewById(R.id.button_enter);
+        mEnterButton.setOnClickListener(this);
+
+		// TODO: utente che sta utilizzando l'applicazione
+		// (per ora inizializzato così in attesa del lavoro aggiornato dell'app in cui inserire,
+		// eventualmente, l'utente nel modello)
+		controller = new MyController();
+		// servizio a cui si riferisce
+		serviceProva = new ServiceProva();
+		if (!this.getIntent().hasExtra("EXTRA_CLOSED")) {
+			controller.createMyDataUser("Nome", "Cognome", new Date(1995, 9, 22), "nomecognome@prova.it", "password".toCharArray(),this);
+
+			// per test
+			controller.addService(serviceProva);
+			controller.withdrawConsentForService(serviceProva);
+			controller.addService(serviceProva);
+		} else {
+			// vengo dalla pressione di un pulsante Up, eventualmente (TODO:) saranno poi passate le credenziali
+			controller.logInUser("nomecognome@prova.it", "password".toCharArray());
+			Toast.makeText(this, this.getIntent().getStringExtra("EXTRA_CLOSED"), Toast.LENGTH_SHORT).show();
+		}
+
+		user = ((MyController)controller).getUser();
+	}
+
+    @Override
+    public void onClick(View view) {
+        Intent i = null;
+        switch(view.getId()){
+            case R.id.button_enter:
+				if (controller.getAllActiveServicesForUser().contains(serviceProva)) {
+					// L'utente ha un account attivo/disabilitato presso il servizio: va avviata l'activity UserProfileActivity
+					// per test
+					try {
+						serviceProva.provideService(user);
+						serviceProva.provideService(user);
+						serviceProva.provideService(user);
+						serviceProva.provideService(user);
+						serviceProva.provideService(user);
+						serviceProva.provideService(user);
+						serviceProva.provideService(user);
+						serviceProva.provideService(user);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					i = new Intent(MainActivity.this, UserProfileActivity.class);
+				} else {
+					// No account presso il servizio: va avviata l'activity NewAccountActivity
+					i = new Intent(MainActivity.this, NewAccountActivity.class);
+				}
+        }
+		i.putExtra(Intent.EXTRA_EMAIL, "nomecognome@prova.it");
+		i.putExtra(Intent.EXTRA_TEXT, "password");
+        startActivity(i);
+    }
+}

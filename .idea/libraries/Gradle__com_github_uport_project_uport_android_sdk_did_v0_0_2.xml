@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: com.github.uport-project.uport-android-sdk:did-v0.0.2">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/did-v0.0.2.aar/b261c09efdd977501c68c83c28f0a67f/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/did-v0.0.2.aar/b261c09efdd977501c68c83c28f0a67f/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

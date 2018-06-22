@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: com.github.uport-project.uport-android-sdk:identity-v0.0.2">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/identity-v0.0.2.aar/8e8ce4239fa456b4bea8604cd7653c7c/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/identity-v0.0.2.aar/8e8ce4239fa456b4bea8604cd7653c7c/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

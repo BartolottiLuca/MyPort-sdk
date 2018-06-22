@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.github.gnosis.bivrost-kotlin:bivrost-solidity-types:v0.6.2@jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.gnosis.bivrost-kotlin/bivrost-solidity-types/v0.6.2/2cd0e0e7bacf1890f456b8c2d6d66d9c4a7540d6/bivrost-solidity-types-v0.6.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.gnosis.bivrost-kotlin/bivrost-solidity-types/v0.6.2/25b686f283eee937f4ae79a20067ae1f4bad07c4/bivrost-solidity-types-v0.6.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

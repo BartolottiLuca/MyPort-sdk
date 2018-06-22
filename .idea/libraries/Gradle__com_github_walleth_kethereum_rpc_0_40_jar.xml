@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.github.walleth.kethereum:rpc:0.40@jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.walleth.kethereum/rpc/0.40/b361895a17d1680ed1b25168782a3eb0a78655d2/rpc-0.40.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.walleth.kethereum/rpc/0.40/58496af3c93b03244ec064693706658728e376c6/rpc-0.40-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

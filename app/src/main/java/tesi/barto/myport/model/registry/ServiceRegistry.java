@@ -57,8 +57,7 @@ public class ServiceRegistry {
         if (service == null)
             throw new IllegalArgumentException("Cannot retrieve metadata for null Service.");
         if (!mappings.containsKey(service))
-            throw new IllegalArgumentException(
-                    "Service " + service.toString() + " entry is not registered in Service Registry.");
+            throw new IllegalArgumentException("Service " + service.toString() + " entry is not registered in Service Registry.");
         return mappings.get(service);
     }
 }

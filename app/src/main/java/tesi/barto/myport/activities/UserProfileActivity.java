@@ -15,15 +15,25 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
+
+import org.jetbrains.annotations.NotNull;
+
+import kotlin.Unit;
+import kotlin.coroutines.experimental.CoroutineContext;
+import me.uport.sdk.Uport;
 import tesi.barto.myport.R;
+import tesi.barto.myport.Uport.LoginUport;
 import tesi.barto.myport.controller.IController;
 import tesi.barto.myport.controller.MyController;
 import tesi.barto.myport.model.MyData.MyData;
 import tesi.barto.myport.model.consents.ServiceConsent;
 import tesi.barto.myport.model.services.ServiceProva;
+import tesi.barto.myport.model.services.ServiceUport;
 import tesi.barto.myport.model.users.IUser;
 import tesi.barto.myport.utilities.VoiceSupport;
 
+import java.io.IOException;
 import java.util.Locale;
 
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
@@ -69,6 +79,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 	private IUser user;
 	private boolean locationConsent;
 	private ServiceProva serviceProva;
+	private ServiceUport serviceUport;
 	private ServiceConsent userSC;
 	private IController controller;
 	private String email;
@@ -93,7 +104,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
 		// servizio a cui si riferisce
 		serviceProva = new ServiceProva();
-
+		serviceUport = new ServiceUport();
 		email = "nomecognome@prova.it";
 		pass = "password";
 		if (this.getIntent().hasExtra(Intent.EXTRA_EMAIL)) {
@@ -129,15 +140,22 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 				}
 			});
 		}
-
+		userSC = user.getActiveSCForService(serviceUport);
+		LoginUport login;
+		try {
+			login=(LoginUport) userSC.getService().provideService(user);
+		}catch (IOException e){
+			//ERRORE IO, probabilmente lettura file
+			login= new LoginUport(MainActivity.getInstance());
+		}
 		uportView = (TextView) findViewById(R.id.uportView);
-		uportView.setText("•Address: "+user.getUportAddress()+"\n•Network: "+user.getUportNetwork()+"\n•Token: "+user.getUportToken()+"\n");
+		uportView.setText("•Address: "+ login.getAccount().getDeviceAddress()+"\n•Network: "+login.getAccount().getNetwork()+"\n•Token: "+login.getAccount().getFuelToken()+"\n");
 		/*uportView.append("•Address: "+user.getUportAddress()+"\n");
 		uportView.append("•Network: "+user.getUportNetwork()+"\n");
 		uportView.append("•Token: "+user.getUportToken()+"\n");*/
 
 		// ottengo l'attuale preferenza per la condivisione della posizione
-		// TODO: NOTA: per adesso c'è solo la posizione come dato, ed ho evitato di farlo,
+		// NOTA: per adesso c'è solo la posizione come dato, ed ho evitato di farlo,
 		// ma nel caso tutti i dati non avessero il consenso ad essere condivisi è come aver
 		// disabilitato il service consent del tutto
 		locationConsent = sharedPreferences.getBoolean("LocationConsent", true); // corretto salvarlo nelle preferences?
@@ -151,7 +169,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 		// se arrivo in questa schermata dopo aver creato un nuovo account:
 		if (this.getIntent().hasExtra(EXTRA_MESSAGE))
 			Toast.makeText(this, this.getIntent().getStringExtra(EXTRA_MESSAGE), Toast.LENGTH_SHORT).show();
-    }
+
+    }//oncreate
 
 	@Override
 	public void onBackPressed() {
@@ -238,7 +257,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
 	/* Questo metodo viene invocato alla pressione del pulsante "Revoca consenso".
 	 * Anch'esso chiede conferma della decisione dell'utente, con supporto vocale, e se
-	 * confermato, cambia opportunamente lo stato del service consent. TODO: In questo caso dovrebbe
+	 * confermato, cambia opportunamente lo stato del service consent.  In questo caso dovrebbe
 	 * completamente lanciare una nuova schermata, la stessa della creazione dell'account presso
 	 * questo servizio che ho messo nel to do in alto, perché il consent è stato revocato e non
 	 * è più attivabile da questo status (withdrawn).
@@ -323,9 +342,22 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 	 * Nella versione finale probabilmente non avrà ragione d'essere, ma per testing è utile.
 	 */
 	public void viewDataConsents(View v) {
-		String allDConsents = controller.getAllDConsents(serviceProva);
+		String allDConsents = controller.getAllDConsents(serviceProva)+controller.getAllDConsents(serviceUport);
 		Intent i = new Intent(this,DataConsentActivity.class);
 		i.putExtra(Intent.EXTRA_TEXT, allDConsents);
 		startActivity(i);
 	}
+
+	public void provaTransazione(View v) {
+		userSC = user.getActiveSCForService(serviceUport);
+		LoginUport login;
+		try {
+			login=(LoginUport) userSC.getService().provideService(user);
+		}catch (IOException e){
+			//ERRORE IO, probabilmente lettura file
+			login= new LoginUport(MainActivity.getInstance());
+		}
+		uportView = (TextView) findViewById(R.id.uportView);
+		login.sendTransaction();
+		uportView.setText("•receipit: "+ login.getAccount().getDeviceAddress()+"\n•Network: "+login.getAccount().getNetwork()+"\n•Token: "+login.getAccount().getFuelToken()+"\n");	}
 }

@@ -18,7 +18,7 @@ public class OutputDataConsent extends DataConsent {
 
     public OutputDataConsent(Set<String> typesConst, ServiceConsent serviceConsent) {
         super(typesConst, serviceConsent);
-        // TODO Auto-generated constructor stub
+        //  Auto-generated constructor stub
     }
 
     @Override

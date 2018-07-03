@@ -45,9 +45,7 @@ public class MyDataUser implements IUser {
     private ISecurityManager securityManager;
     private List<IAccount> accounts;
     private IPersonalDataVault personalDataVault;
-    private String uportToken;
-    private String uportAddress;
-    private String uportNetwork;
+    //private LoginUport uport;
 
     public MyDataUser(String firstName, String lastName, Date dateOfBirth, String emailAddress, char[] password, Context context) {
         super();
@@ -61,11 +59,9 @@ public class MyDataUser implements IUser {
         this.password = password;
         this.securityManager = new tesi.barto.myport.model.security.SecurityManager();
         this.accounts = new ArrayList<IAccount>();
+        //this.uport= new LoginUport(context);
         this.personalDataVault = new PersonalDataVault();
-        LoginUport uport= new LoginUport(context);
-        this.uportToken= uport.getToken();
-        this.uportAddress= uport.getAddressAccount();
-        this.uportNetwork=uport.getNetwork();
+//        this.uportAccount= uport.getAccount();
     }
 
     @Override
@@ -123,14 +119,8 @@ public class MyDataUser implements IUser {
         return this.accounts;
     }
 
-    @Override
-    public String getUportToken(){ return this.uportToken; }
-
-    @Override
-    public String getUportAddress() { return this.uportAddress; }
-
-    @Override
-    public String getUportNetwork() {return this.uportNetwork; }
+    //@Override
+    //public LoginUport getUport(){ return this.uport;}
 
     @Override
     public int hashCode() {
@@ -165,7 +155,7 @@ public class MyDataUser implements IUser {
 		Account toAdd = new Account(service, ConsentManager.askServiceConsent(this, service));
         boolean add = this.accounts.add(toAdd);
 		// ritorna FALSO quando provo ad aggiungere un nuovo account dopo un account revocato, perché..?
-		// TODO controlla logica: posso aggiungere un nuovo account dopo uno revocato? Secondo me sì
+		// controlla logica: posso aggiungere un nuovo account dopo uno revocato? Secondo me sì
     }
 
     @Override

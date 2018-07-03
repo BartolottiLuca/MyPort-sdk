@@ -36,8 +36,7 @@ public class MyData implements IMyData {
     // è peggio quello oppure fare un confronto fra tutti gli email address del
     // set in un ciclo for?
     @Override
-    public IUser createMyDataAccount(String firstName, String lastName, Date dateOfBirth, String emailAddress,
-                                     char[] password, Context context) {
+    public IUser createMyDataAccount(String firstName, String lastName, Date dateOfBirth, String emailAddress, char[] password, Context context) {
         IUser newUser = new MyDataUser(firstName, lastName, dateOfBirth, emailAddress, password, context);
         if (!(this.myDataUsers.add(newUser))) {
             throw new IllegalStateException("Cannot register two users with the same email address.");

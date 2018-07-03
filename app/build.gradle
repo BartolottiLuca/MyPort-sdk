@@ -31,5 +31,5 @@ dependencies {
     implementation "com.github.uport-project.uport-android-sdk:sdk:$uport_sdk_version"
     // required for meta transaction fueling
     implementation "com.github.uport-project.uport-android-sdk:fuelingservice:$uport_sdk_version"
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }

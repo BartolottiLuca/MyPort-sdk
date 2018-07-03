@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 
 class Account implements IAccount {
-    //TODO  modificare per ottenere campi da uport, gestire la creazione e poi siamo a cavallo.
     private IService service;
     private Map<ServiceConsent, List<DataConsent>> dataConsents = new HashMap<ServiceConsent, List<DataConsent>>();
 
@@ -39,7 +38,7 @@ class Account implements IAccount {
         int result = 1;
         result = prime * result + ((service == null) ? 0 : service.hashCode());
         // con l'hash costruito in questo modo, due account per lo stesso servizio che siano withdrawn, active o disabled sono uguali.
-		// (TODO) devo però poter avere tutti gli account withdrawn e un solo account active o disabled: come distinguerli?
+		//  devo però poter avere tutti gli account withdrawn e un solo account active o disabled: come distinguerli?
         return result;
     }
 

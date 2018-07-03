@@ -1,9 +1,16 @@
 package tesi.barto.myport.model.MyData;
 
+
+import me.uport.sdk.identity.Account;
+import tesi.barto.myport.Uport.LoginUport;
+import tesi.barto.myport.activities.MainActivity;
 import tesi.barto.myport.model.registry.Metadata;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Set;
 
 /**
@@ -13,10 +20,12 @@ import java.util.Set;
 public class PersonalDataVault implements IPersonalDataVault {
     String datoUno;
     int datoDue;
+    Account account;
 
     public PersonalDataVault() {
         this.datoUno = readDatoUno();
         this.datoDue = readDatoDue();
+        this.account = readAccount();
     }
 
     private int readDatoDue() {
@@ -59,6 +68,27 @@ public class PersonalDataVault implements IPersonalDataVault {
         return result;
     }
 
+    private Account readAccount(){
+        String fileName = "Account.json";
+        LoginUport result=null;
+        try{
+
+            FileReader reader=new FileReader(fileName);
+            int a;
+            String json="";
+            while ((a=reader.read())>=0){
+                json=json+ (char) a;
+            }
+            result= new LoginUport(MainActivity.getInstance(),json);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (result==null)
+            result=new LoginUport(MainActivity.getInstance());
+        return result.getAccount();
+    }
+
     @Override
     public IDataSet getData(Set<String> typesConst) {
         return null;
@@ -71,6 +101,8 @@ public class PersonalDataVault implements IPersonalDataVault {
                 this.setDatoUno((String) dataSet.getObject(typeConst));
             if (typeConst.equals(Metadata.DATODUEPROVA_CONST))
                 this.setDatoDue((int) dataSet.getObject(typeConst));
+            if (typeConst.equals(Metadata.ACCOUNTUPORT_CONST))
+                this.setLoginUport((Account) dataSet.getObject(typeConst));
         }
     }
 
@@ -81,4 +113,6 @@ public class PersonalDataVault implements IPersonalDataVault {
     public void setDatoDue(int datoDue) {
         this.datoDue = datoDue;
     }
+
+    public void setLoginUport(Account uportA) {this.account = uportA;}
 }

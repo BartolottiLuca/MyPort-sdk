@@ -29,7 +29,7 @@ public class SecurityManager implements ISecurityManager {
         try {
             this.keyPair = generateKeys(keyAlgorithm, randomAlgorithm);
         } catch (NoSuchAlgorithmException e) {
-            // TODO Auto-generated catch block
+            //  Auto-generated catch block
             e.printStackTrace();
         }
     }

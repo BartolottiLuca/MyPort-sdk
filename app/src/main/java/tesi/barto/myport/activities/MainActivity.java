@@ -1,5 +1,6 @@
 package tesi.barto.myport.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +13,7 @@ import tesi.barto.myport.controller.IController;
 import tesi.barto.myport.controller.MyController;
 import tesi.barto.myport.model.services.AbstractService;
 import tesi.barto.myport.model.services.ServiceProva;
+import tesi.barto.myport.model.services.ServiceUport;
 import tesi.barto.myport.model.users.IUser;
 
 import java.io.IOException;
@@ -23,31 +25,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	private IController controller;
 	private IUser user;
 	private AbstractService serviceProva;
+	private AbstractService uportService;
+	private static MainActivity instance=null;
 
+	public static Context getInstance(){
+		return instance;
+	}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+		this.instance=this;
         mEnterButton = (Button) findViewById(R.id.button_enter);
         mEnterButton.setOnClickListener(this);
 
-		// TODO: utente che sta utilizzando l'applicazione
 		// (per ora inizializzato così in attesa del lavoro aggiornato dell'app in cui inserire,
 		// eventualmente, l'utente nel modello)
 		controller = new MyController();
 		// servizio a cui si riferisce
 		serviceProva = new ServiceProva();
+		uportService = new ServiceUport();
 		if (!this.getIntent().hasExtra("EXTRA_CLOSED")) {
 			controller.createMyDataUser("Nome", "Cognome", new Date(1995, 9, 22), "nomecognome@prova.it", "password".toCharArray(),this);
 
 			// per test
 			controller.addService(serviceProva);
 			controller.withdrawConsentForService(serviceProva);
-			controller.addService(serviceProva);
+			//controller.addService(serviceProva);
+			controller.addService(uportService);
 		} else {
-			// vengo dalla pressione di un pulsante Up, eventualmente (TODO:) saranno poi passate le credenziali
+			// vengo dalla pressione di un pulsante Up, eventualmente saranno poi passate le credenziali
 			controller.logInUser("nomecognome@prova.it", "password".toCharArray());
 			Toast.makeText(this, this.getIntent().getStringExtra("EXTRA_CLOSED"), Toast.LENGTH_SHORT).show();
 		}
@@ -64,13 +72,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 					// L'utente ha un account attivo/disabilitato presso il servizio: va avviata l'activity UserProfileActivity
 					// per test
 					try {
-						serviceProva.provideService(user);
-						serviceProva.provideService(user);
-						serviceProva.provideService(user);
-						serviceProva.provideService(user);
-						serviceProva.provideService(user);
-						serviceProva.provideService(user);
-						serviceProva.provideService(user);
 						serviceProva.provideService(user);
 					} catch (IOException e) {
 						e.printStackTrace();

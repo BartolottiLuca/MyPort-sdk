@@ -48,14 +48,12 @@ public class MyController implements IController {
 	public void toggleStatus(IService selectedService, boolean status) {
 		// l'user è già autenticato, in teoria non dovrei fare controlli su
 		// authusr == null. poichè invocato da profile panel,l'account presso il
-		// servizio dovrebbe sempre esistere
+		// servizio dovrebbe sempre esistere TODO transizione a o da qui?
 
 		if (status) {
-			ConsentManager.changeServiceConsentStatusForService(authenticatedUser, selectedService,
-					ConsentStatus.ACTIVE);
+			ConsentManager.changeServiceConsentStatusForService(authenticatedUser, selectedService, ConsentStatus.ACTIVE);
 		} else {
-			ConsentManager.changeServiceConsentStatusForService(authenticatedUser, selectedService,
-					ConsentStatus.DISABLED);
+			ConsentManager.changeServiceConsentStatusForService(authenticatedUser, selectedService, ConsentStatus.DISABLED);
 		}
 	}
 
@@ -83,13 +81,13 @@ public class MyController implements IController {
 		} else {
 			IService sp = new ServiceProva();
 			this.myDataInstance.createServiceAccount(authenticatedUser, sp);
+			//cose a caso!
 		}
 	}
 
 	@Override
 	public void withdrawConsentForService(IService selectedService) {
-		ConsentManager.changeServiceConsentStatusForService(authenticatedUser, selectedService,
-				ConsentStatus.WITHDRAWN);
+		ConsentManager.changeServiceConsentStatusForService(authenticatedUser, selectedService, ConsentStatus.WITHDRAWN);
 	}
 
 	@Override

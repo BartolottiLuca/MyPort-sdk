@@ -110,7 +110,7 @@ public class NewAccountActivity extends AppCompatActivity implements View.OnClic
 						public void onClick(DialogInterface dialog, int which) {
 						// viene creato un account per l'utente
 						// vengo reindirizzato alla schermata di gestione dei consent
-						// TODO: fare sì che tornando indietro dalla successiva schermata non si possa ritornare a questa (finish()?)
+						//  fare sì che tornando indietro dalla successiva schermata non si possa ritornare a questa (finish()?)
 						AbstractService serviceProva = new ServiceProva();
 						IController controller = new MyController();
 						controller.logInUser("nomecognome@prova.it", "password".toCharArray());

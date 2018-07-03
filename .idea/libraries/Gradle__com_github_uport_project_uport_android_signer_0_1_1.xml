@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.uport-project:uport-android-signer-0.1.1">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/uport-android-signer-0.1.1.aar/5e35a79d0dc2cf97c805f5d15788f3d1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/uport-android-signer-0.1.1.aar/5e35a79d0dc2cf97c805f5d15788f3d1/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/uport-android-signer-0.1.1.aar/20d742078ed5410f3d4ba90a6bed55dd/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/uport-android-signer-0.1.1.aar/20d742078ed5410f3d4ba90a6bed55dd/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

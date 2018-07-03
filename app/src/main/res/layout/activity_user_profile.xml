@@ -102,8 +102,16 @@
         <TextView
             android:id="@+id/uportView"
             android:layout_width="match_parent"
-            android:layout_height="175dp"
+            android:layout_height="133dp"
             android:text="TextView" />
+
+        <Button
+            android:id="@+id/button_transition"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#00897b"
+            android:onClick="provaTransazione"
+            android:text="Transazione Prova" />
 
 
     </LinearLayout>

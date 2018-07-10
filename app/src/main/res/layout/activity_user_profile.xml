@@ -37,19 +37,19 @@
             android:id="@+id/locationRL">
 
             <Switch
+                android:id="@+id/locationSwitch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/locationSwitch"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/tv_location_text"
-                android:layout_gravity="end"
-                android:checked="true"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginRight="10dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_gravity="end"
                 android:layout_marginEnd="10dp"
-                android:layout_marginTop="10dp"/>
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                android:checked="true"
+                android:text="@string/tv_location_text"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
         </RelativeLayout>
 
@@ -71,19 +71,19 @@
             android:id="@+id/otherRL">
 
             <Switch
+                android:id="@+id/otherSwitch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/otherSwitch"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Condividi Altro Dato"
-                android:layout_gravity="end"
-                android:checked="true"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginRight="10dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_gravity="end"
                 android:layout_marginEnd="10dp"
-                android:layout_marginTop="10dp"/>
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                android:checked="false"
+                android:text="Servizio Prova"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
         </RelativeLayout>
 
@@ -102,78 +102,81 @@
         <TextView
             android:id="@+id/uportView"
             android:layout_width="match_parent"
-            android:layout_height="133dp"
+            android:layout_height="123dp"
             android:text="TextView" />
-
-        <Button
-            android:id="@+id/button_transition"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#00897b"
-            android:onClick="provaTransazione"
-            android:text="Transazione Prova" />
-
 
     </LinearLayout>
 
     <LinearLayout
-        android:orientation="vertical"
+        android:id="@+id/linearLayoutConsent"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="249dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:id="@+id/linearLayoutConsent">
+        android:layout_alignParentRight="true"
+        android:orientation="vertical">
 
         <Button
-            style="?android:attr/borderlessButtonStyle"
             android:id="@+id/button_dataconsent"
+            style="?android:attr/borderlessButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_gravity="end"
             android:layout_weight="1"
             android:background="#00897b"
-            android:textColor="#000000"
-            android:layout_gravity="end"
+            android:contentDescription="@string/consent_desc"
+            android:onClick="viewDataConsents"
             android:text="@string/consent_text"
             android:textAlignment="center"
-            android:onClick="viewDataConsents"
-            android:contentDescription="@string/consent_desc" />
+            android:textColor="#000000" />
 
+        <Button
+            android:id="@+id/serviceButton"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_gravity="end"
+            android:layout_weight="1"
+            android:background="#00897b"
+            android:onClick="aggiungiServizioProva"
+            android:text="Aggiungi Servizio"
+            android:textAlignment="center"
+            android:textColor="#000000" />
 
         <LinearLayout
-            android:orientation="horizontal"
+            android:id="@+id/linearLayoutConsentOptions"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:id="@+id/linearLayoutConsentOptions">
+            android:orientation="horizontal">
 
             <Button
-                style="?android:attr/borderlessButtonStyle"
                 android:id="@+id/button_disable"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_gravity="end"
                 android:layout_weight="1"
                 android:background="#80cbc4"
-                android:textColor="#000000"
-                android:layout_gravity="end"
+                android:contentDescription="@string/disable_desc"
+                android:onClick="disableOption"
                 android:text="@string/disable_text"
                 android:textAlignment="center"
-                android:onClick="disableOption"
-                android:contentDescription="@string/disable_desc" />
+                android:textColor="#000000" />
 
             <Button
-                style="?android:attr/borderlessButtonStyle"
                 android:id="@+id/button_withdraw"
+                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_gravity="end"
                 android:layout_weight="1"
                 android:background="#26a69a"
-                android:textColor="#000000"
-                android:layout_gravity="end"
+                android:contentDescription="@string/withdraw_desc"
+                android:onClick="withdrawOption"
                 android:text="@string/withdraw_text"
                 android:textAlignment="center"
-                android:onClick="withdrawOption"
-                android:contentDescription="@string/withdraw_desc" />
+                android:textColor="#000000" />
 
         </LinearLayout>
     </LinearLayout>

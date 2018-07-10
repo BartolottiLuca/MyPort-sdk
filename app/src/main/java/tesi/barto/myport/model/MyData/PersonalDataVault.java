@@ -1,16 +1,15 @@
 package tesi.barto.myport.model.MyData;
 
 
-import me.uport.sdk.identity.Account;
+import android.content.res.AssetManager;
+
 import tesi.barto.myport.Uport.LoginUport;
 import tesi.barto.myport.activities.MainActivity;
 import tesi.barto.myport.model.registry.Metadata;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Set;
 
 /**
@@ -20,22 +19,22 @@ import java.util.Set;
 public class PersonalDataVault implements IPersonalDataVault {
     String datoUno;
     int datoDue;
-    Account account;
+    LoginUport login;
 
     public PersonalDataVault() {
         this.datoUno = readDatoUno();
         this.datoDue = readDatoDue();
-        this.account = readAccount();
+        this.login = readlogin();
     }
 
     private int readDatoDue() {
         String fileName = "DatiProva.txt";
         int result = 0;
         try {
-            BufferedReader br = new BufferedReader(new FileReader(fileName));
+            AssetManager assetManager = MainActivity.getAppContext().getResources().getAssets();
+            InputStream inputStream = assetManager.open(fileName);
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String line;
-
-
             while ((line = br.readLine()) != null) {
                 if (line == null || line.length() == 0)
                     throw new IllegalArgumentException("line must be initialized");
@@ -52,10 +51,10 @@ public class PersonalDataVault implements IPersonalDataVault {
         String fileName = "DatiProva.txt";
         String result = new String();
         try {
-            BufferedReader br = new BufferedReader(new FileReader(fileName));
+            AssetManager assetManager = MainActivity.getAppContext().getResources().getAssets();
+            InputStream inputStream = assetManager.open(fileName);
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String line;
-
-
             while ((line = br.readLine()) != null) {
                 if (line == null || line.length() == 0)
                     throw new IllegalArgumentException("line must be initialized");
@@ -68,30 +67,43 @@ public class PersonalDataVault implements IPersonalDataVault {
         return result;
     }
 
-    private Account readAccount(){
+    private LoginUport readlogin(){
         String fileName = "Account.json";
         LoginUport result=null;
-        try{
-
-            FileReader reader=new FileReader(fileName);
-            int a;
-            String json="";
-            while ((a=reader.read())>=0){
-                json=json+ (char) a;
+        try{ //thanks to StackOverflow
+            AssetManager assetManager = MainActivity.getAppContext().getResources().getAssets();
+            InputStream inputStream = assetManager.open(fileName);
+            //to get the content of the file as String
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuilder out = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                out.append(line);
             }
-            result= new LoginUport(MainActivity.getInstance(),json);
+            reader.close();
+            result= new LoginUport(MainActivity.getAppContext(),out.toString());
 
         } catch (Exception e) {
             e.printStackTrace();
+            result=new LoginUport(MainActivity.getAppContext());
         }
-        if (result==null)
-            result=new LoginUport(MainActivity.getInstance());
-        return result.getAccount();
+        //if (result==null)
+            //result=new LoginUport(MainActivity.getAppContext());
+        return result;
     }
 
     @Override
-    public IDataSet getData(Set<String> typesConst) {
-        return null;
+    public IDataSet getData(Set<String> typesConst) {  //perchè valentina aveva fatto return NULL ?! misteri del cazzo
+        DataSet set = new DataSet();
+        for (String typeConst : typesConst) {
+            if (typeConst.equals(Metadata.DATOUNOPROVA_CONST))
+                set.put(typeConst,this.datoUno);
+            if (typeConst.equals(Metadata.DATODUEPROVA_CONST))
+                set.put(typeConst,this.datoDue);
+            if (typeConst.equals(Metadata.LOGINUPORT_CONST))
+                set.put(typeConst,this.login);
+        }
+        return set;
     }
 
     @Override
@@ -101,8 +113,8 @@ public class PersonalDataVault implements IPersonalDataVault {
                 this.setDatoUno((String) dataSet.getObject(typeConst));
             if (typeConst.equals(Metadata.DATODUEPROVA_CONST))
                 this.setDatoDue((int) dataSet.getObject(typeConst));
-            if (typeConst.equals(Metadata.ACCOUNTUPORT_CONST))
-                this.setLoginUport((Account) dataSet.getObject(typeConst));
+            if (typeConst.equals(Metadata.LOGINUPORT_CONST))
+                this.setUportLogin((LoginUport) dataSet.getObject(typeConst));
         }
     }
 
@@ -114,5 +126,5 @@ public class PersonalDataVault implements IPersonalDataVault {
         this.datoDue = datoDue;
     }
 
-    public void setLoginUport(Account uportA) {this.account = uportA;}
+    public void setUportLogin(LoginUport uportL) {this.login = uportL;}
 }

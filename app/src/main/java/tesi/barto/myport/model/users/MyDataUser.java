@@ -6,7 +6,14 @@ package tesi.barto.myport.model.users;
 
 import android.content.Context;
 
+import org.jetbrains.annotations.NotNull;
+
+import kotlin.Unit;
+import kotlin.coroutines.experimental.Continuation;
+import kotlin.coroutines.experimental.CoroutineContext;
+import kotlinx.coroutines.experimental.Job;
 import tesi.barto.myport.Uport.LoginUport;
+import tesi.barto.myport.activities.MainActivity;
 import tesi.barto.myport.model.MyData.IPersonalDataVault;
 import tesi.barto.myport.model.MyData.PersonalDataVault;
 import tesi.barto.myport.model.consents.ConsentManager;
@@ -15,7 +22,9 @@ import tesi.barto.myport.model.consents.DataConsent;
 import tesi.barto.myport.model.consents.ServiceConsent;
 import tesi.barto.myport.model.security.ISecurityManager;
 import tesi.barto.myport.model.services.IService;
+import tesi.barto.myport.model.services.ServiceUport;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -150,12 +159,52 @@ public class MyDataUser implements IUser {
     @Override
     public void newAccountAtService(IService service) {
         if (this.hasAccountAtService(service))
-            throw new IllegalArgumentException(
-                    "User " + this.toString() + " already has an account at service " + service.toString() + ".");
-		Account toAdd = new Account(service, ConsentManager.askServiceConsent(this, service));
+            throw new IllegalArgumentException("User " + this.toString() + " already has an account at service " + service.toString() + ".");
+        //ServiceUport uService =new ServiceUport();
+        /*if(!service.equals(new ServiceUport())){
+
+            LoginUport login;
+
+            try {
+                login= (LoginUport) getActiveSCForService(new ServiceUport()).getService().provideService(this);
+            } catch (IOException e) { //non dovrei mai arrivarci, ma ciccia
+                e.printStackTrace();
+                login= new LoginUport(MainActivity.getAppContext());
+            }
+            login.confirmService(service, new Continuation<Unit>() {  //non so se funziona con questa continuation, speriamo bene (non funzionerà mai)
+                @NotNull
+                @Override
+                public CoroutineContext getContext() {
+
+                    return null; //ESPLODE
+                }
+
+                @Override
+                public void resume(Unit unit) {
+
+                }
+
+                @Override
+                public void resumeWithException(Throwable throwable) {
+
+                }
+            });
+            if(login.getReceipt()!=null) { //in base alla ricevuta lo approvo o meno
+            //if(true) { //in base alla ricevuta lo approvo o meno
+                Account toAdd = new Account(service, ConsentManager.askServiceConsent(this, service));
+                boolean add = this.accounts.add(toAdd);
+                // ritorna FALSO quando provo ad aggiungere un nuovo account dopo un account revocato, perché..?
+                // controlla logica: posso aggiungere un nuovo account dopo uno revocato? Secondo me sì
+            }else{
+                String qualcosa= "ciao";
+                //la ricevuta è nulla. Ho aspettato troppo poco? c'è stato un errore? who knows
+            }
+        }else{ //sto registrando servizio uport, non faccio transizione
+            Account toAdd = new Account(service, ConsentManager.askServiceConsent(this, service));
+            boolean add = this.accounts.add(toAdd);
+        }*/
+        Account toAdd = new Account(service, ConsentManager.askServiceConsent(this, service));
         boolean add = this.accounts.add(toAdd);
-		// ritorna FALSO quando provo ad aggiungere un nuovo account dopo un account revocato, perché..?
-		// controlla logica: posso aggiungere un nuovo account dopo uno revocato? Secondo me sì
     }
 
     @Override

@@ -4,7 +4,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
@@ -15,13 +17,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Continuation;
-
-import org.jetbrains.annotations.NotNull;
-
-import kotlin.Unit;
-import kotlin.coroutines.experimental.CoroutineContext;
-import me.uport.sdk.Uport;
 import tesi.barto.myport.R;
 import tesi.barto.myport.Uport.LoginUport;
 import tesi.barto.myport.controller.IController;
@@ -68,8 +63,10 @@ import static android.provider.AlarmClock.EXTRA_MESSAGE;
 public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Switch mLocationSwitch;
-    private Button mDisableButton;
-    private Button mWithdrawButton;
+
+    private static Button mDisableButton;  //fatti statici così da poter chiamare setButtonClickable
+    private static Button mWithdrawButton;
+    private static Button mServiceButton;
 	private TextView uportView;
 
 	private TextToSpeech tts;
@@ -85,26 +82,34 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 	private String email;
 	private String pass;
 	private Switch mOtherSwitch;
+	private LoginUport login;
+	private UserProfileActivity activityInstance =null;
 
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        activityInstance=this;
         setContentView(R.layout.activity_user_profile);
 
 		mLocationSwitch = (Switch) findViewById(R.id.locationSwitch);
 		mOtherSwitch = (Switch) findViewById(R.id.otherSwitch);
 		mDisableButton = (Button) findViewById(R.id.button_disable);
 		mDisableButton.setOnClickListener(this);
+		setButtonClickable("DisableButton",false);
+
 		mWithdrawButton = (Button) findViewById(R.id.button_withdraw);
 		mWithdrawButton.setOnClickListener(this);
+		setButtonClickable("WithdrawButton",false);
+
+		mServiceButton= (Button) findViewById(R.id.serviceButton);
+		mServiceButton.setOnClickListener(this);
+
 
 		setTitle("Gestione Consent");
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
-		// servizio a cui si riferisce
-		serviceProva = new ServiceProva();
 		serviceUport = new ServiceUport();
+		serviceProva= new ServiceProva();
 		email = "nomecognome@prova.it";
 		pass = "password";
 		if (this.getIntent().hasExtra(Intent.EXTRA_EMAIL)) {
@@ -117,14 +122,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 		controller = new MyController();
 		controller.logInUser(email, pass.toCharArray());
 		user = MyData.getInstance().loginUser(email, pass.toCharArray());
-
-		userSC = user.getActiveSCForService(serviceProva);
-		if (userSC == null) {
-			// l'utente ha un account ma non è attivo: inizializzo di conseguenza la gui
-			mDisableButton.setText("Abilita\n" + "consenso");
-			mLocationSwitch.setEnabled(false);
-			mOtherSwitch.setEnabled(false);
-		}
 
 		// controllo se l'utente preferisce l'assistente vocale o meno
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -141,18 +138,14 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 			});
 		}
 		userSC = user.getActiveSCForService(serviceUport);
-		LoginUport login;
 		try {
-			login=(LoginUport) userSC.getService().provideService(user);
+			login = (LoginUport) userSC.getService().provideService(user);
 		}catch (IOException e){
-			//ERRORE IO, probabilmente lettura file
-			login= new LoginUport(MainActivity.getInstance());
+			login = new LoginUport(MainActivity.getAppContext());
 		}
+
 		uportView = (TextView) findViewById(R.id.uportView);
 		uportView.setText("•Address: "+ login.getAccount().getDeviceAddress()+"\n•Network: "+login.getAccount().getNetwork()+"\n•Token: "+login.getAccount().getFuelToken()+"\n");
-		/*uportView.append("•Address: "+user.getUportAddress()+"\n");
-		uportView.append("•Network: "+user.getUportNetwork()+"\n");
-		uportView.append("•Token: "+user.getUportToken()+"\n");*/
 
 		// ottengo l'attuale preferenza per la condivisione della posizione
 		// NOTA: per adesso c'è solo la posizione come dato, ed ho evitato di farlo,
@@ -161,7 +154,12 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 		locationConsent = sharedPreferences.getBoolean("LocationConsent", true); // corretto salvarlo nelle preferences?
 		// dovrei recuperarlo dal DataConsent per questo servizio..?
 
-		mLocationSwitch.setChecked(locationConsent);
+		mLocationSwitch.setChecked(false);
+		mLocationSwitch.setTextOn("ON");
+		mLocationSwitch.setTextOff("OFF");
+		mLocationSwitch.setOnClickListener(this);
+
+		mLocationSwitch.setChecked(false);
 		mLocationSwitch.setTextOn("ON");
 		mLocationSwitch.setTextOff("OFF");
 		mLocationSwitch.setOnClickListener(this);
@@ -169,7 +167,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 		// se arrivo in questa schermata dopo aver creato un nuovo account:
 		if (this.getIntent().hasExtra(EXTRA_MESSAGE))
 			Toast.makeText(this, this.getIntent().getStringExtra(EXTRA_MESSAGE), Toast.LENGTH_SHORT).show();
-
     }//oncreate
 
 	@Override
@@ -192,8 +189,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 	}
 
 	/*
-			 * Handler di tutti i pulsanti e gli switch che avvia il metodo corretto
-			 */
+	 * Handler di tutti i pulsanti e gli switch che avvia il metodo corretto
+	 */
+
     @Override
     public void onClick(View view) {
         switch(view.getId()){
@@ -205,6 +203,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 break;
 			case R.id.locationSwitch:
 				changeLocationConsent(view);
+				break;
+			case R.id.serviceButton:
+				aggiungiServizioProva(view);
 				break;
         }
     }
@@ -230,20 +231,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						// cambia la preferenza nelle sharedPreferences
-						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putBoolean("LocationConsent", mLocationSwitch.isChecked());
-						editor.commit();
-
+						login.changeConsentStatus(user, userSC, serviceProva, sharedPreferences.edit(),"LocationConsent",mLocationSwitch,activityInstance);
 						// cambia lo status del consent per la posizione
-						/*Set<String> data = new HashSet<String>();
-						if (mLocationSwitch.isChecked()) {
-							data.add(Metadata.DATOUNOPROVA_CONST);
-							data.add(Metadata.DATODUEPROVA_CONST);
-						} else {
-							data.add(Metadata.DATODUEPROVA_CONST);
-						}
-						OutputDataConsent outputDataConsent = new OutputDataConsent(data, userSC);
-						user.addDataConsent(outputDataConsent, serviceProva);*/
 					}
 				})
 				.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -255,21 +244,64 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 				.show();
 	}
 
+	public void checkSwitch(Switch switc, boolean bool){
+		/*final Switch sw=switc;
+		final Boolean bo=bool;
+		new Handler().postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				sw.setChecked(bo);
+			}
+		}, 100);*/
+	}
+/*
+	public void changeServiceConsent(View view) {
+		if(voiceSupport)
+			if(!VoiceSupport.isTalkBackEnabled(this)){
+				tts.speak("Il consenso per il servizio sarà " + (mOtherSwitch.isChecked() ? "attivato" : "disattivato") + ". Procedere?", TextToSpeech.QUEUE_FLUSH, null);
+			}
+		Toast.makeText(this, "Il consenso per il servizio sarà " + (mOtherSwitch.isChecked() ? "attivato" : "disattivato") + ". Procedere?", Toast.LENGTH_SHORT).show();
+		new AlertDialog.Builder(this)
+				.setIcon(android.R.drawable.ic_dialog_alert)
+				.setTitle(mOtherSwitch.isChecked() ? "Attiva" : "Disattiva")
+				.setMessage("Il consenso per la posizione sarà " + (mOtherSwitch.isChecked() ? "attivato" : "disattivato") + ".\nProcedere?")
+				.setPositiveButton("Sì", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// cambia la preferenza nelle sharedPreferences
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putBoolean("ServiceConsent", mOtherSwitch.isChecked());
+						editor.commit();
+					}
+				})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						//devo mandare una transizione
+						mOtherSwitch.setChecked(!mOtherSwitch.isChecked());
+					}
+				})
+				.show();
+	}
+*/
+
 	/* Questo metodo viene invocato alla pressione del pulsante "Revoca consenso".
 	 * Anch'esso chiede conferma della decisione dell'utente, con supporto vocale, e se
-	 * confermato, cambia opportunamente lo stato del service consent.  In questo caso dovrebbe
+	 * confermato, cambia opportunamente lo stato del service consent. (NO: In questo caso dovrebbe
 	 * completamente lanciare una nuova schermata, la stessa della creazione dell'account presso
-	 * questo servizio che ho messo nel to do in alto, perché il consent è stato revocato e non
-	 * è più attivabile da questo status (withdrawn).
+	 * (uesto servizio che ho messo nel to do in alto, perché il consent è stato revocato e non
+	 * è più attivabile da questo status (withdrawn)).
+	 * rimane questa schermata, se si vuole aggiungere di nuovo il servizio si premerà sul bottone "aggiungi servizio"
 	 * Se non viene confermato, nulla cambia.
 	 */
 	public void withdrawOption(final View view) {
+		setButtonClickable("WithdrawButton", false);
+		setButtonClickable("DisableButton", false);
 		if(voiceSupport)
 			if(!VoiceSupport.isTalkBackEnabled(this)){
 				tts.speak("Il consenso sarà revocato. Procedere?", TextToSpeech.QUEUE_FLUSH, null);
 			}
 		Toast.makeText(this, "Il consenso sarà revocato. Procedere?", Toast.LENGTH_SHORT).show();
-
 		new AlertDialog.Builder(this)
 				.setIcon(android.R.drawable.ic_dialog_alert)
 				.setTitle("Revoca")
@@ -278,20 +310,17 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						// cambia lo stato del consent a withdrawn
-						controller.withdrawConsentForService(serviceProva);
-						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.remove("LocationConsent");
-						editor.commit();
-
-						// avvia l'activity per creare un nuovo account MyData
-						Intent i = new Intent (UserProfileActivity.this, NewAccountActivity.class);
-						i.putExtra(EXTRA_MESSAGE, "Account eliminato con successo");
-						i.putExtra(Intent.EXTRA_EMAIL, email);
-						i.putExtra(Intent.EXTRA_TEXT, pass);
-						startActivity(i);
+						//TODO chiamo funzione in login e faccio una transazione
+						login.withdrawConsentForService(serviceProva, controller, sharedPreferences.edit());
 					}
 				})
-				.setNegativeButton("No", null)
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						setButtonClickable("WithdrawButton", true);
+						setButtonClickable("DisableButton", true);
+					}
+				})
 				.show();
 	}
 
@@ -302,6 +331,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
      * Se non viene confermato, nulla cambia.
      */
 	public void disableOption(View v){
+		setButtonClickable("WithdrawButton", false);
+		setButtonClickable("DisableButton", false);
 		if(voiceSupport)
 			if(!VoiceSupport.isTalkBackEnabled(this)){
 				tts.speak("Il consenso sarà " + ((mDisableButton.getText().toString().contains("Disabilita")) ? "disattivato" : "attivato") + ". Procedere?", TextToSpeech.QUEUE_FLUSH, null);
@@ -315,24 +346,18 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 				.setPositiveButton("Sì", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
+						login.swapDisableOption(mDisableButton,controller,mLocationSwitch,mOtherSwitch,serviceProva,activityInstance);
 						// cambia lo stato del consent enabled>disabled o disabled>enabled
 						// cambia il pulsante ad "Attiva"/"Disattiva"
-						if (mDisableButton.getText().toString().contains("Disabilita")) {
-							controller.toggleStatus(serviceProva, false);
-							mDisableButton.setText("Abilita\n" +
-									"consenso");
-							mLocationSwitch.setEnabled(false);
-							mOtherSwitch.setEnabled(false);
-						} else {
-							controller.toggleStatus(serviceProva, true);
-							mDisableButton.setText("Disabilita\n" +
-									"consenso");
-							mLocationSwitch.setEnabled(true);
-							mOtherSwitch.setEnabled(true);
-						}
 					}
 				})
-				.setNegativeButton("No", null)
+				.setNegativeButton("No",new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						setButtonClickable("WithdrawButton", true);
+						setButtonClickable("DisableButton", true);
+					}
+				})
 				.show();
 	}
 
@@ -342,22 +367,69 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 	 * Nella versione finale probabilmente non avrà ragione d'essere, ma per testing è utile.
 	 */
 	public void viewDataConsents(View v) {
-		String allDConsents = controller.getAllDConsents(serviceProva)+controller.getAllDConsents(serviceUport);
+		String allDConsents="";
+		try{
+			userSC = user.getActiveSCForService(serviceProva);
+			if (userSC != null) {
+				// l'utente ha un account ma non è attivo: inizializzo di conseguenza la gui
+				allDConsents = controller.getAllDConsents(serviceProva);
+			}
+		}catch(Exception e){
+			allDConsents="";
+		}
+		allDConsents += controller.getAllDConsents(serviceUport);
 		Intent i = new Intent(this,DataConsentActivity.class);
 		i.putExtra(Intent.EXTRA_TEXT, allDConsents);
 		startActivity(i);
 	}
 
-	public void provaTransazione(View v) {
-		userSC = user.getActiveSCForService(serviceUport);
-		LoginUport login;
-		try {
-			login=(LoginUport) userSC.getService().provideService(user);
-		}catch (IOException e){
-			//ERRORE IO, probabilmente lettura file
-			login= new LoginUport(MainActivity.getInstance());
+	public static void setButtonClickable(String button,boolean bol){
+		if(button.compareToIgnoreCase("DisableButton")==0) {
+			mDisableButton.setClickable(bol);
+			mDisableButton.setBackgroundColor(bol?Color.parseColor("#00897b"):Color.DKGRAY);
 		}
-		uportView = (TextView) findViewById(R.id.uportView);
-		login.sendTransaction();
-		uportView.setText("•receipit: "+ login.getAccount().getDeviceAddress()+"\n•Network: "+login.getAccount().getNetwork()+"\n•Token: "+login.getAccount().getFuelToken()+"\n");	}
+		if(button.compareToIgnoreCase("WithdrawButton")==0){
+			mWithdrawButton.setClickable(bol);
+			mWithdrawButton.setBackgroundColor(bol?Color.parseColor("#00897b"):Color.DKGRAY);
+		}
+		if(button.compareToIgnoreCase("ServiceButton")==0){
+			mServiceButton.setClickable(bol);
+			mServiceButton.setBackgroundColor(bol?Color.parseColor("#00897b"):Color.DKGRAY);
+		}
+	}
+
+	public void aggiungiServizioProva(View v) {
+		setButtonClickable("ServiceButton",false);
+		if(voiceSupport)
+			if(!VoiceSupport.isTalkBackEnabled(this)){
+				tts.speak("Verrà aggiunto il servizio Prova. Procedere?", TextToSpeech.QUEUE_FLUSH, null);
+			}
+		Toast.makeText(this, "Verrà aggiunto il servizio Prova. Procedere?", Toast.LENGTH_SHORT).show();
+		final UserProfileActivity context=this;
+		new AlertDialog.Builder(context)
+				.setIcon(android.R.drawable.ic_dialog_alert)
+				.setTitle("Aggiungi")
+				.setMessage("Verrà aggiunto il servizio Prova. Procedere?")
+				.setPositiveButton("Sì", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// dobbiamo aggiungere il servizio
+						userSC = user.getActiveSCForService(serviceUport);
+						try {
+							login=(LoginUport) userSC.getService().provideService(user); //probabilmente non necessario
+						}catch (IOException e){
+							//ERRORE IO, probabilmente lettura file
+							login= new LoginUport(MainActivity.getAppContext());
+						}
+						login.addService(controller,serviceProva);
+					}
+				})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						setButtonClickable("ServiceButton",true);
+					}
+				})
+				.show();
+	}
 }

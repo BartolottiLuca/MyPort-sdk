@@ -1,0 +1,10 @@
+{
+  "uportRoot": "0x22a8ef23019c00948ac59bb123b66c8c5b076569",
+  "devKey": "0x1ed7e6f71163645f637a6fd2fc6f9676b87db94e",
+  "network": "0x04",
+  "proxy": "0x825489aa9746f78f5e7ac842790aa0090fdd47b2",
+  "manager": "0x87ea811785c4bd30fc104c2543cf8ed90f7eeec7",
+  "txRelay": "0xda8c6dce9e9a85e6f9df7b09b2354da44cb48331",
+  "fuelToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJpYXQiOjE1MzAxOTc4OTYsImF1ZCI6WyJhcGkudXBvcnQubWUvbmlzYWJhIiwiYXBpLnVwb3J0Lm1lL3VubnUiLCJhcGkudXBvcnQubWUvc2Vuc3VpIl0sImV4cCI6MTUzMDE5ODE5Niwic3ViIjoiMHgxZWQ3ZTZmNzExNjM2NDVmNjM3YTZmZDJmYzZmOTY3NmI4N2RiOTRlIiwiaXNzIjoiYXBpLnVwb3J0Lm1lL25pc2FiYSJ9.61ffNHuKLq-_Pnzi9dPJHhQxsFTzMxKMFmZ4OUaMKbXpabqYS8zu67lBiaT4wi27Y5DRB1JfwtTvwH3noeqtvA",
+  "signerType": "MetaIdentityManager"
+}

@@ -22,20 +22,21 @@ public class ServiceUport extends AbstractService {
     }
 
     @Override
-    protected Object concreteService(IDataSet dataSet){
+    protected Object concreteService(IDataSet dataSet){ //return LoginUport instance
 
-        Account acc;
+        LoginUport login;
         try{
-            acc= (Account) dataSet.getObject(Metadata.ACCOUNTUPORT_CONST);
+            login= (LoginUport) dataSet.getObject(Metadata.LOGINUPORT_CONST);
         }catch (Exception e){  //dovrei farlo solo su illegal argument exception
-            return new LoginUport(MainActivity.getInstance());
+            e.printStackTrace();
+            return new LoginUport(MainActivity.getAppContext()); //TODO sono entrato qua. perchè? la chiave è giusta, ll'oggetto è nel data set e dovrebbe essere tutto ok
         }
-        return acc;
+        return login;
     }
 
     @Override
     protected void registerService() {
-        identifiers.add(Metadata.ACCOUNTUPORT_CONST);
+        identifiers.add(Metadata.LOGINUPORT_CONST);
         ServiceRegistry.registerService(this, identifiers);
     }
 

@@ -40,6 +40,8 @@ public class ConsentManager {
 
         // inizializzazione casuale in attesa di approfondimento
 
+        //TODO far partire da qua le transizioni di verifica? forse forse..
+
         byte[] tokenFromUser = "Example Token From User".getBytes(), tokenSignedUser = null;
         try {
             tokenSignedUser = user.getSecurityManager().sign(tokenFromUser);
@@ -47,8 +49,7 @@ public class ConsentManager {
             e.printStackTrace();
             throw new SecurityException("Encountered error during sign process - user side.");
         }
-        if (!(service.getSecurityManager().verify(user.getSecurityManager().getPublicKey(), tokenFromUser,
-                tokenSignedUser))) {
+        if (!(service.getSecurityManager().verify(user.getSecurityManager().getPublicKey(), tokenFromUser, tokenSignedUser))) {
             throw new SecurityException("Encountered error during verify process - Service side.");
         } // else
 

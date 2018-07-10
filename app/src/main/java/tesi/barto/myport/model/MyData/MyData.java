@@ -64,8 +64,7 @@ public class MyData implements IMyData {
     @Override
     public IDataSet getDataSetForOutputDataConsent(OutputDataConsent outputDataConsent) {
         if (outputDataConsent.getServiceConsent().getConsentStatus() != ConsentStatus.ACTIVE)
-            throw new IllegalStateException(
-                    "Cannot get DataSet if DataConsent is not valid. ServiceConsent is not Active.");
+            throw new IllegalStateException("Cannot get DataSet if DataConsent is not valid. ServiceConsent is not Active.");
         IUser user = outputDataConsent.getServiceConsent().getUser();
         IPersonalDataVault pdv = user.getPersonalDataVault();
         return pdv.getData(outputDataConsent.getTypesConst());

@@ -1,131 +1,253 @@
 package tesi.barto.myport.Uport
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.widget.Button
+import android.widget.Switch
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
-import me.uport.sdk.Transactions
 import me.uport.sdk.Uport
 import me.uport.sdk.core.Networks
-import me.uport.sdk.did.UportRegistry
-import me.uport.sdk.extensions.awaitConfirmation
-import me.uport.sdk.extensions.send
-import me.uport.sdk.extensions.waitForTransactionToMine
+import me.uport.sdk.extensions.*
 import me.uport.sdk.fuelingservice.FuelTokenProvider
 import me.uport.sdk.identity.Account
-import me.uport.sdk.identity.SignerType
 import me.uport.sdk.jsonrpc.JsonRPC
 import tesi.barto.myport.activities.MainActivity
-
+import tesi.barto.myport.activities.UserProfileActivity
+import tesi.barto.myport.controller.IController
+import tesi.barto.myport.model.consents.OutputDataConsent
+import tesi.barto.myport.model.consents.ServiceConsent
+import tesi.barto.myport.model.registry.Metadata
+import tesi.barto.myport.model.services.IService
+import tesi.barto.myport.model.users.IUser
 
 class LoginUport () {
-    private var con:Context= MainActivity.getInstance()
-    private var uportToken:String = ""
-    private var uportSigner:SignerType = SignerType.MetaIdentityManager
-    private var uportNetwork:String = ""
-    private var uportHandle:String = ""
-    private var uportDevice:String = ""
-    private var uportProxy:String = ""
-    private var uportIdentity:String = ""
-    private var uportTX:String = ""
-    private var uportA:Account= Account.blank
-    private var exception:Exception?= Exception()
-    private var receipit:JsonRPC.TransactionReceipt? =null
-    //private var con =context
+    private var con: Context = MainActivity.getAppContext()
+    private var uportError: String = ""
+    private var uportA: Account = Account.blank
+    private var accountSetted: Boolean = false
+    private var receipit: JsonRPC.TransactionReceipt? = null
+    private var receiptSetted: Boolean = false
+    private var job: Job? = null
 
-    constructor(context: Context):this(){
+    constructor(context: Context) : this() {
+        con = context
         if (Uport.defaultAccount == null) {
-            val config = Uport.Configuration().setApplicationContext(context.applicationContext).setFuelTokenProvider(FuelTokenProvider(context.applicationContext, "2ouNYyHP1yLjfVM4mVdYKwx3jGEUgpQHBya"))
+            val config = Uport.Configuration().setApplicationContext(con).setFuelTokenProvider(FuelTokenProvider(con, "2ouNYyHP1yLjfVM4mVdYKwx3jGEUgpQHBya"))
             Uport.initialize(config)
-
             Uport.createAccount(network = Networks.rinkeby) { err, account ->
                 // update UI to reflect the existence of a defaultAccount
                 if (err == null) {
-                    uportToken = account.fuelToken
-                    uportSigner = account.signerType
-                    uportNetwork = account.network
-                    uportHandle = account.handle
-                    uportDevice = account.deviceAddress
-                    uportProxy = account.proxyAddress
-                    uportIdentity = account.identityManagerAddress
-                    uportTX = account.txRelayAddress
-
-                    var uportAddress:String = account.address
-                    //defaultAccountView.text = acc.toJson(true)
-                    //uportA.copy(uportHandle,uportDevice,uportNetwork,uportProxy,uportIdentity,uportTX,uportToken,uportSigner)
-                    uportA= Account(uportHandle,uportDevice,uportNetwork,uportProxy,uportIdentity,uportTX,uportToken,uportSigner)
+                    this.setAccount(account)
+                    MainActivity.setEnterButtonClickable(true)
                 } else {
-                    uportToken="ERROR: $err."
-                    //defaultAccountView.text = "ERROR: $err."
+                    uportError = "ERROR: $err."
                 }
             }
-        }else{
-            uportToken = Uport.defaultAccount?.fuelToken as String
-            uportSigner = Uport.defaultAccount?.signerType as SignerType
-            uportNetwork = Uport.defaultAccount?.network as String
-            uportHandle = Uport.defaultAccount?.handle as String
-            uportDevice = Uport.defaultAccount?.deviceAddress as String
-            uportProxy = Uport.defaultAccount?.proxyAddress as String
-            uportIdentity = Uport.defaultAccount?.identityManagerAddress as String
-            uportTX = Uport.defaultAccount?.txRelayAddress as String
-            uportA= Account(uportHandle,uportDevice,uportNetwork,uportProxy,uportIdentity,uportTX,uportToken,uportSigner)
+        } else {
+            this.setAccount(Uport.defaultAccount as Account)
         }
     }
 
-    constructor(context: Context, accountJson: String):this(){
+    constructor(context: Context, accountJson: String) : this() {
+        this.con = context
         if (Uport.defaultAccount == null) {
-
-            val config = Uport.Configuration().setApplicationContext(context.applicationContext).setFuelTokenProvider(FuelTokenProvider(context.applicationContext, "2p1yWKU8Ucd4vuHmYmc3fvcvTkYL11KXdjH"))
+            val config = Uport.Configuration().setApplicationContext(con).setFuelTokenProvider(FuelTokenProvider(con, "2p1yWKU8Ucd4vuHmYmc3fvcvTkYL11KXdjH"))
             Uport.initialize(config)
-            uportA= (Account.fromJson(accountJson) ?: Account.blank )
-        }else{
-            uportToken = Uport.defaultAccount?.fuelToken as String
-            uportSigner = Uport.defaultAccount?.signerType as SignerType
-            uportNetwork = Uport.defaultAccount?.network as String
-            uportHandle = Uport.defaultAccount?.handle as String
-            uportDevice = Uport.defaultAccount?.deviceAddress as String
-            uportProxy = Uport.defaultAccount?.proxyAddress as String
-            uportIdentity = Uport.defaultAccount?.identityManagerAddress as String
-            uportTX = Uport.defaultAccount?.txRelayAddress as String
-            uportA= Account(uportHandle,uportDevice,uportNetwork,uportProxy,uportIdentity,uportTX,uportToken,uportSigner)
+            this.setAccount(Account.fromJson(accountJson) ?: Account.blank)
+        } else {
+            this.setAccount(Uport.defaultAccount as Account)
         }
     }
 
-    constructor(context: Context, account: Account):this(){
+    constructor(context: Context, account: Account) : this() { //non serve, ma l'ho fatto e lo lascio qua
+        this.con = context
         if (Uport.defaultAccount == null) {
-
-            val config = Uport.Configuration().setApplicationContext(context.applicationContext).setFuelTokenProvider(FuelTokenProvider(context.applicationContext, "2p1yWKU8Ucd4vuHmYmc3fvcvTkYL11KXdjH"))
-            Uport.initialize(config)
-            uportA= account
-        }else{
-            uportToken = Uport.defaultAccount?.fuelToken as String
-            uportSigner = Uport.defaultAccount?.signerType as SignerType
-            uportNetwork = Uport.defaultAccount?.network as String
-            uportHandle = Uport.defaultAccount?.handle as String
-            uportDevice = Uport.defaultAccount?.deviceAddress as String
-            uportProxy = Uport.defaultAccount?.proxyAddress as String
-            uportIdentity = Uport.defaultAccount?.identityManagerAddress as String
-            uportTX = Uport.defaultAccount?.txRelayAddress as String
-            uportA= Account(uportHandle,uportDevice,uportNetwork,uportProxy,uportIdentity,uportTX,uportToken,uportSigner)
+            this.setAccount(account)
+        } else {
+            this.setAccount(Uport.defaultAccount as Account)
         }
     }
 
-    fun getAccount():Account?{
-        return uportA
+    fun getAccount(): Account? {
+        if (accountSetted)
+            return uportA
+        return null
+    }
+
+    private fun setAccount(acc: Account) {
+        this.uportA = acc
+        this.accountSetted = true
+    }
+
+    fun getReceipt(): JsonRPC.TransactionReceipt? {
+        if (this.receiptSetted)
+            return this.receipit
+        return null //Severo ma Giusto
+    }
+
+    private fun setReceipt(rec: JsonRPC.TransactionReceipt) {
+        this.receipit = rec
+        this.receiptSetted = true
+    }
+
+    fun addService(controller: IController, service: IService) {
+        launch { launch {
+               if (accountSetted && (job==null || (job as Job).isCompleted)) {
+                   var str = "Confermare servizio: " + service.toString()
+                   receipit = null
+                   receiptSetted = false
+                   uportA.send(con, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
+                       if (err == null) {
+                           job = Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
+                               if (err == null) {
+                                   setReceipt(receipt)
+                                   controller.addService(service) // se ci arrivo da DataConsentActivity e ho già l'account settato espode tutto, giustamente.
+                                   UserProfileActivity.setButtonClickable("DisableButton", true)
+                                   UserProfileActivity.setButtonClickable("WithdrawButton", true)
+                               } else {
+                                   uportError = "" + err
+                                   UserProfileActivity.setButtonClickable("ServiceButton", true)
+                               }
+                           }
+                       } else {
+                           uportError = "" + err
+                           UserProfileActivity.setButtonClickable("ServiceButton", true)
+                       }
+                   }.join()
+               } else {
+                   receipit = null
+                   receiptSetted = false
+                   UserProfileActivity.setButtonClickable("ServiceButton", true)
+               }
+        } }
+    }
+
+    fun changeConsentStatus(user:IUser, userSC:ServiceConsent, service: IService, editor: SharedPreferences.Editor, consentName:String, switch:Switch, activity: UserProfileActivity){
+        launch{ launch {
+            if (accountSetted && (job==null || (job as Job).isCompleted)) {
+                var str = "Cambio di consent di " +consentName
+                receipit = null
+                receiptSetted = false
+                uportA.send(con, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
+                    if (err == null) {
+                        job = Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
+                            if (err == null) {
+                                editor.putBoolean(consentName, switch.isChecked)
+                                editor.commit()
+                                setReceipt(receipt)
+
+                                val data = HashSet<String>()
+                                if (switch.isChecked) {
+                                    data.add(Metadata.DATOUNOPROVA_CONST )
+                                    data.add(Metadata.DATODUEPROVA_CONST)
+                                } else {
+                                    data.add(Metadata.DATODUEPROVA_CONST)
+                                }
+                                val outputDataConsent = OutputDataConsent(data, userSC)
+                                user.addDataConsent(outputDataConsent, service)
+                            } else {
+                                uportError = "" +err
+                                activity.checkSwitch(switch,!switch.isChecked)
+                            }
+                        }
+                    } else {
+                        uportError = "" + err
+                        activity.checkSwitch(switch,!switch.isChecked)
+                    }
+                }.join()
+            } else {
+                receipit = null
+                receiptSetted = false
+                activity.checkSwitch(switch,!switch.isChecked)
+            }
+        } }
     }
 
 
-    fun sendTransaction(){
-            uportA.send(con.applicationContext,uportTX,"transazione_prova".toByteArray()){ err, txHash ->
-                // Update UI to indicate that transaction has been sent and is confirming
-                Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
-                    // Complete operation in UX
-                    this.receipit=receipt
-                    var contract:String? = this.receipit?.contractAddress
+    fun withdrawConsentForService(service:IService,controller: IController,editor: SharedPreferences.Editor){
+        launch { launch {
+            if (accountSetted && (job==null || (job as Job).isCompleted)) {
+                var str = "Verrà revocato il consenso per il servizio "+service.toString()
+                receipit = null
+                receiptSetted = false
+                uportA.send(con, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
+                    if (err == null) {
+                        job = Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
+                            if (err == null) {
+                                controller.withdrawConsentForService(service)
+                                editor.remove("LocationConsent")
+                                editor.commit()
+                                UserProfileActivity.setButtonClickable("ServiceButton", true)
+                            } else {
+                                uportError = "" + err
+                                UserProfileActivity.setButtonClickable("WithdrawButton", true)
+                                UserProfileActivity.setButtonClickable("DisableButton", true)
+                            }
+                        }
+                    } else {
+                        uportError = "" + err
+                        UserProfileActivity.setButtonClickable("WithdrawButton", true)
+                        UserProfileActivity.setButtonClickable("DisableButton", true)
+                    }
+                }.join()
+            } else {
+                receipit = null
+                receiptSetted = false
+                UserProfileActivity.setButtonClickable("WithdrawButton", true)
+                UserProfileActivity.setButtonClickable("DisableButton", true)
+            }
+        }
+        }
+    }
+
+    fun swapDisableOption(button: Button,controller: IController,mLocationSwitch: Switch, mOtherSwitch: Switch, service: IService, activity: UserProfileActivity){
+        launch { launch {
+            if (accountSetted && (job==null || (job as Job).isCompleted)) {
+                var str = "Verrà "
+                if (button.getText().toString().contains("Disabilita")){
+                    str +="abilitato "
+                }else{
+                    str +="disabilitato "
+
                 }
+                str+="il consenso per il servizio "+service.toString()
+                receipit = null
+                receiptSetted = false
+                uportA.send(con, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
+                    if (err == null) {
+                        job = Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
+                            if (err == null) {
+                                if (button.getText().toString().contains("Disabilita"))
+                                {
+                                    controller.toggleStatus(service, false)
+                                    button.setText("Abilita\n" + "consenso")
+                                    activity.checkSwitch(mLocationSwitch,false)
+                                    activity.checkSwitch(mOtherSwitch,false)
+                                }else{
+                                    controller.toggleStatus(service, true)
+                                    button.setText("Disabilita\n" + "consenso")
+                                    activity.checkSwitch(mLocationSwitch,true)
+                                    activity.checkSwitch(mOtherSwitch,true)
+                                }
+                                UserProfileActivity.setButtonClickable("DisableButton", true)
+                            } else {
+                                uportError = "" + err
+                                UserProfileActivity.setButtonClickable("DisableButton", true)
+                            }
+                        }
+                    } else {
+                        uportError = "" + err
+                        UserProfileActivity.setButtonClickable("DisableButton", true)
+                    }
+                }.join()
+            } else {
+                receipit = null
+                receiptSetted = false
+                UserProfileActivity.setButtonClickable("DisableButton", true)
 
             }
+        } }
     }
 
-    fun GetReceipit() :JsonRPC.TransactionReceipt? {
-        return this.receipit
-    }
 }

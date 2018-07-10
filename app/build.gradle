@@ -3,6 +3,12 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 def uport_sdk_version = "v0.0.2"
 
+kotlin {
+    experimental {
+        coroutines 'enable'
+    }
+}
+
 android {
     compileSdkVersion 27
     defaultConfig {
@@ -32,4 +38,5 @@ dependencies {
     // required for meta transaction fueling
     implementation "com.github.uport-project.uport-android-sdk:fuelingservice:$uport_sdk_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
 }

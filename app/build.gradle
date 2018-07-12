@@ -14,7 +14,7 @@ android {
     defaultConfig {
         applicationId "tesi.barto.myport"
         minSdkVersion 23
-        targetSdkVersion 27
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

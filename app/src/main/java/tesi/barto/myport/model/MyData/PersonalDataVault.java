@@ -3,7 +3,7 @@ package tesi.barto.myport.model.MyData;
 
 import android.content.res.AssetManager;
 
-import tesi.barto.myport.Uport.LoginUport;
+import tesi.barto.myport.Uport.UportData;
 import tesi.barto.myport.activities.MainActivity;
 import tesi.barto.myport.model.registry.Metadata;
 
@@ -19,12 +19,12 @@ import java.util.Set;
 public class PersonalDataVault implements IPersonalDataVault {
     String datoUno;
     int datoDue;
-    LoginUport login;
+    UportData uportAccount;
 
     public PersonalDataVault() {
         this.datoUno = readDatoUno();
         this.datoDue = readDatoDue();
-        this.login = readlogin();
+        this.uportAccount = readAccount();
     }
 
     private int readDatoDue() {
@@ -67,9 +67,9 @@ public class PersonalDataVault implements IPersonalDataVault {
         return result;
     }
 
-    private LoginUport readlogin(){
+    private UportData readAccount(){
         String fileName = "Account.json";
-        LoginUport result=null;
+        UportData result=null;
         try{ //thanks to StackOverflow
             AssetManager assetManager = MainActivity.getAppContext().getResources().getAssets();
             InputStream inputStream = assetManager.open(fileName);
@@ -81,14 +81,14 @@ public class PersonalDataVault implements IPersonalDataVault {
                 out.append(line);
             }
             reader.close();
-            result= new LoginUport(MainActivity.getAppContext(),out.toString());
+            result= new UportData(MainActivity.getAppContext(),out.toString());
 
         } catch (Exception e) {
             e.printStackTrace();
-            result=new LoginUport(MainActivity.getAppContext());
+            result=new UportData(MainActivity.getAppContext());
         }
         //if (result==null)
-            //result=new LoginUport(MainActivity.getAppContext());
+            //result=new UportData(MainActivity.getAppContext());
         return result;
     }
 
@@ -100,8 +100,8 @@ public class PersonalDataVault implements IPersonalDataVault {
                 set.put(typeConst,this.datoUno);
             if (typeConst.equals(Metadata.DATODUEPROVA_CONST))
                 set.put(typeConst,this.datoDue);
-            if (typeConst.equals(Metadata.LOGINUPORT_CONST))
-                set.put(typeConst,this.login);
+            if (typeConst.equals(Metadata.UPORTDATA_CONST))
+                set.put(typeConst,this.uportAccount);
         }
         return set;
     }
@@ -113,8 +113,8 @@ public class PersonalDataVault implements IPersonalDataVault {
                 this.setDatoUno((String) dataSet.getObject(typeConst));
             if (typeConst.equals(Metadata.DATODUEPROVA_CONST))
                 this.setDatoDue((int) dataSet.getObject(typeConst));
-            if (typeConst.equals(Metadata.LOGINUPORT_CONST))
-                this.setUportLogin((LoginUport) dataSet.getObject(typeConst));
+            if (typeConst.equals(Metadata.UPORTDATA_CONST))
+                this.setUportLogin((UportData) dataSet.getObject(typeConst));
         }
     }
 
@@ -126,5 +126,5 @@ public class PersonalDataVault implements IPersonalDataVault {
         this.datoDue = datoDue;
     }
 
-    public void setUportLogin(LoginUport uportL) {this.login = uportL;}
+    public void setUportLogin(UportData uportL) {this.uportAccount = uportL;}
 }

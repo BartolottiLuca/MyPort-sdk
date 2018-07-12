@@ -4,8 +4,7 @@ package tesi.barto.myport.model.services;
 import java.util.HashSet;
 import java.util.Set;
 
-import me.uport.sdk.identity.Account;
-import tesi.barto.myport.Uport.LoginUport;
+import tesi.barto.myport.Uport.UportData;
 import tesi.barto.myport.activities.MainActivity;
 import tesi.barto.myport.model.MyData.IDataSet;
 import tesi.barto.myport.model.registry.Metadata;
@@ -22,21 +21,21 @@ public class ServiceUport extends AbstractService {
     }
 
     @Override
-    protected Object concreteService(IDataSet dataSet){ //return LoginUport instance
+    protected Object concreteService(IDataSet dataSet){ //return UportData instance
 
-        LoginUport login;
+        UportData account;
         try{
-            login= (LoginUport) dataSet.getObject(Metadata.LOGINUPORT_CONST);
+            account= (UportData) dataSet.getObject(Metadata.UPORTDATA_CONST);
         }catch (Exception e){  //dovrei farlo solo su illegal argument exception
             e.printStackTrace();
-            return new LoginUport(MainActivity.getAppContext()); //TODO sono entrato qua. perchè? la chiave è giusta, ll'oggetto è nel data set e dovrebbe essere tutto ok
+            return new UportData(MainActivity.getAppContext());
         }
-        return login;
+        return account;
     }
 
     @Override
     protected void registerService() {
-        identifiers.add(Metadata.LOGINUPORT_CONST);
+        identifiers.add(Metadata.UPORTDATA_CONST);
         ServiceRegistry.registerService(this, identifiers);
     }
 

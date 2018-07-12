@@ -3,6 +3,7 @@ package tesi.barto.myport.activities;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
@@ -14,12 +15,18 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import tesi.barto.myport.R;
+import tesi.barto.myport.Uport.UportData;
 import tesi.barto.myport.controller.IController;
 import tesi.barto.myport.controller.MyController;
+import tesi.barto.myport.model.MyData.MyData;
+import tesi.barto.myport.model.consents.ServiceConsent;
 import tesi.barto.myport.model.services.AbstractService;
 import tesi.barto.myport.model.services.ServiceProva;
+import tesi.barto.myport.model.services.ServiceUport;
+import tesi.barto.myport.model.users.IUser;
 import tesi.barto.myport.utilities.VoiceSupport;
 
+import java.io.IOException;
 import java.util.Locale;
 
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
@@ -33,13 +40,21 @@ public class NewAccountActivity extends AppCompatActivity implements View.OnClic
 	private String email;
 	private String password;
 
+	private NewAccountActivity instance=null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_new_account);
 
+		this.instance=this;
+
 		mNewAccountButton = (ImageButton) findViewById(R.id.button_add);
 		mNewAccountButton.setOnClickListener(this);
+
+
+		mNewAccountButton.setClickable(true);
+		mNewAccountButton.setBackgroundColor(Color.parseColor("#00897b"));
 
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -103,7 +118,7 @@ public class NewAccountActivity extends AppCompatActivity implements View.OnClic
 
 		new AlertDialog.Builder(NewAccountActivity.this)
 				.setIcon(android.R.drawable.ic_dialog_alert)
-				.setTitle("Nuovo account MyData")
+				.setTitle("Nuovo account servizioProva")
 				.setMessage("Procedere?")
 				.setPositiveButton("Sì", new DialogInterface.OnClickListener() {
 						@Override
@@ -114,20 +129,59 @@ public class NewAccountActivity extends AppCompatActivity implements View.OnClic
 						AbstractService serviceProva = new ServiceProva();
 						IController controller = new MyController();
 						controller.logInUser("nomecognome@prova.it", "password".toCharArray());
+
+						//LUCA
+						AbstractService serviceUport = new ServiceUport();
+						UportData account;
+						IUser user = MyData.getInstance().loginUser("nomecognome@prova.it", "password".toCharArray());
+						ServiceConsent userSC = user.getActiveSCForService(serviceUport);
+						try {
+							account=(UportData) userSC.getService().provideService(user); //probabilmente non necessario
+						}catch (IOException e){
+							//ERRORE IO, probabilmente lettura file
+							account= new UportData(MainActivity.getAppContext());
+						}
+						mNewAccountButton.setClickable(false);
+						mNewAccountButton.setBackgroundColor(Color.DKGRAY);
+
+						account.addService(controller,serviceProva,instance);
+						//FINE LUCA
+/*
 						controller.addService(serviceProva);
 
 						SharedPreferences.Editor editor = sharedPreferences.edit();
 						editor.putBoolean("LocationConsent", true);
 						editor.commit();
-
 						Intent i = new Intent(NewAccountActivity.this, UserProfileActivity.class);
 						i.putExtra(EXTRA_MESSAGE, "Account creato con successo");
 						i.putExtra(Intent.EXTRA_EMAIL, email);
 						i.putExtra(Intent.EXTRA_TEXT, password);
-						startActivity(i);
+						startActivity(i);*/
 					}
 					})
-				.setNegativeButton("No", null)
+				.setNegativeButton("No",  new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						mNewAccountButton.setClickable(true);
+						mNewAccountButton.setBackgroundColor(Color.parseColor("#00897b"));
+					}
+				})
 				.show();
+	}
+
+	public void onConfirmedService(){
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putBoolean("LocationConsent", true);
+		editor.commit();
+		Intent i = new Intent(NewAccountActivity.this, UserProfileActivity.class);
+		i.putExtra(EXTRA_MESSAGE, "Account creato con successo");
+		i.putExtra(Intent.EXTRA_EMAIL, email);
+		i.putExtra(Intent.EXTRA_TEXT, password);
+		startActivity(i);
+	}
+
+	public void onFailureService() {
+		mNewAccountButton.setClickable(true);
+		mNewAccountButton.setBackgroundColor(Color.parseColor("#00897b"));
 	}
 }

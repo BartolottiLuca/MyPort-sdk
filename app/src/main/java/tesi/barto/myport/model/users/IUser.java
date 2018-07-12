@@ -3,9 +3,6 @@ package tesi.barto.myport.model.users;
 /**
  * Created by Valentina on 24/08/2017.
  */
-
-import me.uport.sdk.identity.Account;
-import tesi.barto.myport.Uport.LoginUport;
 import tesi.barto.myport.model.MyData.IPersonalDataVault;
 import tesi.barto.myport.model.consents.DataConsent;
 import tesi.barto.myport.model.consents.ServiceConsent;

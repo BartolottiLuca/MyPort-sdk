@@ -1,6 +1,7 @@
 package tesi.barto.myport.Uport
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.widget.Button
 import android.widget.Switch
@@ -13,6 +14,7 @@ import me.uport.sdk.fuelingservice.FuelTokenProvider
 import me.uport.sdk.identity.Account
 import me.uport.sdk.jsonrpc.JsonRPC
 import tesi.barto.myport.activities.MainActivity
+import tesi.barto.myport.activities.NewAccountActivity
 import tesi.barto.myport.activities.UserProfileActivity
 import tesi.barto.myport.controller.IController
 import tesi.barto.myport.model.consents.OutputDataConsent
@@ -21,7 +23,7 @@ import tesi.barto.myport.model.registry.Metadata
 import tesi.barto.myport.model.services.IService
 import tesi.barto.myport.model.users.IUser
 
-class LoginUport () {
+class UportData () {
     private var con: Context = MainActivity.getAppContext()
     private var uportError: String = ""
     private var uportA: Account = Account.blank
@@ -30,8 +32,8 @@ class LoginUport () {
     private var receiptSetted: Boolean = false
     private var job: Job? = null
 
-    constructor(context: Context) : this() {
-        con = context
+    constructor(applicationContext: Context) : this() {
+        con = applicationContext
         if (Uport.defaultAccount == null) {
             val config = Uport.Configuration().setApplicationContext(con).setFuelTokenProvider(FuelTokenProvider(con, "2ouNYyHP1yLjfVM4mVdYKwx3jGEUgpQHBya"))
             Uport.initialize(config)
@@ -49,8 +51,8 @@ class LoginUport () {
         }
     }
 
-    constructor(context: Context, accountJson: String) : this() {
-        this.con = context
+    constructor(applicationContext: Context, accountJson: String) : this() {
+        this.con = applicationContext
         if (Uport.defaultAccount == null) {
             val config = Uport.Configuration().setApplicationContext(con).setFuelTokenProvider(FuelTokenProvider(con, "2p1yWKU8Ucd4vuHmYmc3fvcvTkYL11KXdjH"))
             Uport.initialize(config)
@@ -60,8 +62,8 @@ class LoginUport () {
         }
     }
 
-    constructor(context: Context, account: Account) : this() { //non serve, ma l'ho fatto e lo lascio qua
-        this.con = context
+    constructor(applicationContext: Context, account: Account) : this() { //non serve, ma l'ho fatto e lo lascio qua
+        this.con = applicationContext
         if (Uport.defaultAccount == null) {
             this.setAccount(account)
         } else {
@@ -91,7 +93,7 @@ class LoginUport () {
         this.receiptSetted = true
     }
 
-    fun addService(controller: IController, service: IService) {
+    fun addService(controller: IController, service: IService, newAccountActivity: NewAccountActivity) {
         launch { launch {
                if (accountSetted && (job==null || (job as Job).isCompleted)) {
                    var str = "Confermare servizio: " + service.toString()
@@ -103,22 +105,28 @@ class LoginUport () {
                                if (err == null) {
                                    setReceipt(receipt)
                                    controller.addService(service) // se ci arrivo da DataConsentActivity e ho già l'account settato espode tutto, giustamente.
+                                   newAccountActivity.onConfirmedService()
+                                   /*
                                    UserProfileActivity.setButtonClickable("DisableButton", true)
                                    UserProfileActivity.setButtonClickable("WithdrawButton", true)
+                                   */
                                } else {
                                    uportError = "" + err
-                                   UserProfileActivity.setButtonClickable("ServiceButton", true)
+                                   newAccountActivity.onFailureService()
+                                   //UserProfileActivity.setButtonClickable("ServiceButton", true)
                                }
                            }
                        } else {
                            uportError = "" + err
-                           UserProfileActivity.setButtonClickable("ServiceButton", true)
+                           newAccountActivity.onFailureService()
+                           // UserProfileActivity.setButtonClickable("ServiceButton", true)
                        }
                    }.join()
                } else {
                    receipit = null
                    receiptSetted = false
-                   UserProfileActivity.setButtonClickable("ServiceButton", true)
+                   newAccountActivity.onFailureService()
+                   //UserProfileActivity.setButtonClickable("ServiceButton", true)
                }
         } }
     }
@@ -165,7 +173,7 @@ class LoginUport () {
     }
 
 
-    fun withdrawConsentForService(service:IService,controller: IController,editor: SharedPreferences.Editor){
+    fun withdrawConsentForService(service:IService,userProfileActivity: UserProfileActivity){
         launch { launch {
             if (accountSetted && (job==null || (job as Job).isCompleted)) {
                 var str = "Verrà revocato il consenso per il servizio "+service.toString()
@@ -175,27 +183,33 @@ class LoginUport () {
                     if (err == null) {
                         job = Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
                             if (err == null) {
+                                userProfileActivity.onWithdrawnSuccess()
+                                /*
                                 controller.withdrawConsentForService(service)
                                 editor.remove("LocationConsent")
                                 editor.commit()
                                 UserProfileActivity.setButtonClickable("ServiceButton", true)
+*/
                             } else {
                                 uportError = "" + err
-                                UserProfileActivity.setButtonClickable("WithdrawButton", true)
-                                UserProfileActivity.setButtonClickable("DisableButton", true)
+//                                UserProfileActivity.setButtonClickable("WithdrawButton", true)
+//                                UserProfileActivity.setButtonClickable("DisableButton", true)
+                                userProfileActivity.onWithdrawnFailure()
                             }
                         }
                     } else {
                         uportError = "" + err
-                        UserProfileActivity.setButtonClickable("WithdrawButton", true)
-                        UserProfileActivity.setButtonClickable("DisableButton", true)
+//                        UserProfileActivity.setButtonClickable("WithdrawButton", true)
+//                        UserProfileActivity.setButtonClickable("DisableButton", true)
+                        userProfileActivity.onWithdrawnFailure()
                     }
                 }.join()
             } else {
                 receipit = null
                 receiptSetted = false
-                UserProfileActivity.setButtonClickable("WithdrawButton", true)
-                UserProfileActivity.setButtonClickable("DisableButton", true)
+//                UserProfileActivity.setButtonClickable("WithdrawButton", true)
+//                UserProfileActivity.setButtonClickable("DisableButton", true)
+                userProfileActivity.onWithdrawnFailure()
             }
         }
         }

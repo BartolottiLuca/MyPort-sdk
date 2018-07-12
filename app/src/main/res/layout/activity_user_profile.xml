@@ -130,19 +130,6 @@
             android:textAlignment="center"
             android:textColor="#000000" />
 
-        <Button
-            android:id="@+id/serviceButton"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_gravity="end"
-            android:layout_weight="1"
-            android:background="#00897b"
-            android:onClick="aggiungiServizioProva"
-            android:text="Aggiungi Servizio"
-            android:textAlignment="center"
-            android:textColor="#000000" />
-
         <LinearLayout
             android:id="@+id/linearLayoutConsentOptions"
             android:layout_width="match_parent"

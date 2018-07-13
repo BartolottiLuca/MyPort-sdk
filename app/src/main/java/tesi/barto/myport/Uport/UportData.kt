@@ -1,10 +1,6 @@
 package tesi.barto.myport.Uport
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.widget.Button
-import android.widget.Switch
-import com.google.android.gms.tasks.SuccessContinuation
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 import me.uport.sdk.Uport
@@ -13,23 +9,11 @@ import me.uport.sdk.extensions.*
 import me.uport.sdk.fuelingservice.FuelTokenProvider
 import me.uport.sdk.identity.Account
 import me.uport.sdk.jsonrpc.JsonRPC
-import org.slf4j.helpers.Util
 import tesi.barto.myport.activities.MainActivity
-import tesi.barto.myport.activities.NewAccountActivity
-import tesi.barto.myport.activities.UserProfileActivity
-import tesi.barto.myport.controller.IController
-import tesi.barto.myport.model.consents.OutputDataConsent
-import tesi.barto.myport.model.consents.ServiceConsent
-import tesi.barto.myport.model.registry.Metadata
-import tesi.barto.myport.model.services.IService
-import tesi.barto.myport.model.users.IUser
 import java.lang.reflect.Method
-import java.util.*
-import java.util.concurrent.Callable
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 class UportData () {
-    private var con: Context = MainActivity.getInstance()
+    private var context: Context = MainActivity.getInstance()
     private var uportError: String = ""
     private var uportA: Account = Account.blank
     private var accountSetted: Boolean = false
@@ -37,16 +21,16 @@ class UportData () {
     private var receiptSetted: Boolean = false
     private var job: Job? = null
 
-    constructor(MainActivityInstance: Context) : this() {
-        con = MainActivityInstance
+    constructor(context: Context) : this() {
+        this.context = context
         if (Uport.defaultAccount == null) {
-            val config = Uport.Configuration().setApplicationContext(con).setFuelTokenProvider(FuelTokenProvider(con, "2ouNYyHP1yLjfVM4mVdYKwx3jGEUgpQHBya"))
+            val config = Uport.Configuration().setApplicationContext(this.context).setFuelTokenProvider(FuelTokenProvider(this.context, "2ouNYyHP1yLjfVM4mVdYKwx3jGEUgpQHBya"))
             Uport.initialize(config)
             Uport.createAccount(network = Networks.rinkeby) { err, account ->
                 // update UI to reflect the existence of a defaultAccount
                 if (err == null) {
                     this.setAccount(account)
-                    (con as MainActivity).setEnterButtonClickable(true)
+                    (this.context as MainActivity).setEnterButtonClickable(true)
                 } else {
                     uportError = "ERROR: $err."
                 }
@@ -57,18 +41,18 @@ class UportData () {
     }
 
     constructor(applicationContext: Context, accountJson: String) : this() {
-        this.con = applicationContext
+        this.context = applicationContext
         if (Uport.defaultAccount == null) {
-            val config = Uport.Configuration().setApplicationContext(con).setFuelTokenProvider(FuelTokenProvider(con, "2p1yWKU8Ucd4vuHmYmc3fvcvTkYL11KXdjH"))
+            val config = Uport.Configuration().setApplicationContext(context).setFuelTokenProvider(FuelTokenProvider(context, "2p1yWKU8Ucd4vuHmYmc3fvcvTkYL11KXdjH"))
             Uport.initialize(config)
-            this.setAccount(Account.fromJson(accountJson) ?: Account.blank)
+            UportData(context,Account.fromJson(accountJson) ?: Account.blank)
         } else {
             this.setAccount(Uport.defaultAccount as Account)
         }
     }
 
     constructor(applicationContext: Context, account: Account) : this() { //non serve, ma l'ho fatto e lo lascio qua
-        this.con = applicationContext
+        this.context = applicationContext
         if (Uport.defaultAccount == null) {
             this.setAccount(account)
         } else {
@@ -104,7 +88,7 @@ class UportData () {
                 var str = transactionString
                 receipit = null
                 receiptSetted = false
-                uportA.send(con, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
+                uportA.send(this@UportData.context, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
                     if (err == null) {
                         job = Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
                             if (err == null) {
@@ -135,7 +119,10 @@ class UportData () {
         } }
     }
 
+}
 
+
+/*
 
     fun addService(controller: IController, service: IService, newAccountActivity: NewAccountActivity) {
         launch { launch {
@@ -143,16 +130,18 @@ class UportData () {
                    var str = "Confermare servizio: " + service.toString()
                    receipit = null
                    receiptSetted = false
-                   uportA.send(con, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
+                   uportA.send(this@UportData.context, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
                        if (err == null) {
                            job = Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
                                if (err == null) {
                                    setReceipt(receipt)
                                    //newAccountActivity.onConfirmedService(controller, service)
-                                   /*
+                                   */
+/*
                                    UserProfileActivity.setButtonClickable("DisableButton", true)
                                    UserProfileActivity.setButtonClickable("WithdrawButton", true)
-                                   */
+                                   *//*
+
                                } else {
                                    uportError = "" + err
                                    newAccountActivity.onFailedService()
@@ -180,7 +169,7 @@ class UportData () {
                 var str = "Cambio di consent di " +consentName
                 receipit = null
                 receiptSetted = false
-                uportA.send(con, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
+                uportA.send(this@UportData.context, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
                     if (err == null) {
                         job = Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
                             if (err == null) {
@@ -222,17 +211,19 @@ class UportData () {
                 var str = "Verrà revocato il consenso per il servizio "+service.toString()
                 receipit = null
                 receiptSetted = false
-                uportA.send(con, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
+                uportA.send(this@UportData.context, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
                     if (err == null) {
                         job = Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
                             if (err == null) {
                                 userProfileActivity.onWithdrawnSuccess()
-                                /*
+                                */
+/*
                                 controller.withdrawConsentForService(service)
                                 editor.remove("LocationConsent")
                                 editor.commit()
                                 UserProfileActivity.setButtonClickable("ServiceButton", true)
-*/
+*//*
+
                             } else {
                                 uportError = "" + err
 //                                UserProfileActivity.setButtonClickable("WithdrawButton", true)
@@ -271,7 +262,7 @@ class UportData () {
                 str+="il consenso per il servizio "+service.toString()
                 receipit = null
                 receiptSetted = false
-                uportA.send(con, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
+                uportA.send(this@UportData.context, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
                     if (err == null) {
                         job = Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
                             if (err == null) {
@@ -306,5 +297,5 @@ class UportData () {
             }
         } }
     }
+*/
 
-}

@@ -71,8 +71,8 @@ import static android.provider.AlarmClock.EXTRA_MESSAGE;
 public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Switch mLocationSwitch;
-    private static Button mDisableButton;  //fatti statici così da poter chiamare setButtonClickable
-    private static Button mWithdrawButton;
+    private Button mDisableButton;  //fatti statici così da poter chiamare setButtonClickable
+    private Button mWithdrawButton;
 	private TextView uportView;
 	private TextToSpeech tts;
 	private boolean voiceSupport;
@@ -432,7 +432,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 //			mLocationSwitch.setEnabled(true);
 //			mOtherSwitch.setEnabled(true);
 		}
-		UserProfileActivity.setButtonClickable("DisableButton", true);
+		setButtonClickable("DisableButton", true);
 		setButtonClickable("WithdrawButton",true);
 	}
 
@@ -463,7 +463,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 		startActivity(i);
 	}
 
-	public static void setButtonClickable(String button,boolean bol){
+	public void setButtonClickable(String button,boolean bol){
 		if(button.compareToIgnoreCase("DisableButton")==0) {
 			mDisableButton.setClickable(bol);
 			mDisableButton.setBackgroundColor(bol?Color.parseColor("#00897b"):Color.DKGRAY);

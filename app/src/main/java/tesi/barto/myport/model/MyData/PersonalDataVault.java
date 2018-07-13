@@ -17,9 +17,9 @@ import java.util.Set;
  */
 
 public class PersonalDataVault implements IPersonalDataVault {
-    String datoUno;
-    int datoDue;
-    UportData uportAccount;
+    private String datoUno;
+    private int datoDue;
+    private UportData uportAccount;
 
     public PersonalDataVault() {
         this.datoUno = readDatoUno();
@@ -82,18 +82,18 @@ public class PersonalDataVault implements IPersonalDataVault {
             }
             reader.close();
             result= new UportData(MainActivity.getInstance(),out.toString());
-
         } catch (Exception e) {
             e.printStackTrace();
             result=new UportData(MainActivity.getInstance());
+            //qui dovrei salvarmi l'account in json come file Account.json
         }
-        //if (result==null)
-            //result=new UportData(MainActivity.getInstance());
         return result;
     }
 
     @Override
-    public IDataSet getData(Set<String> typesConst) {  //perchè valentina aveva fatto return NULL ?! misteri del cazzo
+    public IDataSet getData(Set<String> typesConst) {
+
+        //perchè valentina aveva fatto return NULL ?!
         DataSet set = new DataSet();
         for (String typeConst : typesConst) {
             if (typeConst.equals(Metadata.DATOUNOPROVA_CONST))

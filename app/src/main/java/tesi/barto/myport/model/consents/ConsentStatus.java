@@ -11,7 +11,7 @@ public enum ConsentStatus {
 
     private String status;
 
-    private ConsentStatus(String status) {
+    ConsentStatus(String status) {
         this.status = status;
     }
 

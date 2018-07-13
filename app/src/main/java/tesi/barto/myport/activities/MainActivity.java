@@ -1,5 +1,9 @@
 package tesi.barto.myport.activities;
 
+/**
+ * Edited by Luca Bartolotti on 01/07/2018.
+ */
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -23,24 +27,22 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static Button mEnterButton;
+    private Button mEnterButton;
 	private IController controller;
 	private IUser user;
 	private AbstractService serviceUport;
 	private AbstractService serviceProva;
 	private static MainActivity instance=null;
 
-	public static Context getAppContext(){
-		return instance.getApplicationContext();
-	}
+	public static Context getInstance(){ return instance; }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		this.instance = this;
-		mEnterButton = (Button) findViewById(R.id.button_enter);
-		mEnterButton.setClickable(false);
+		instance = this;
+		mEnterButton = findViewById(R.id.button_enter);
+		setEnterButtonClickable(false);
 		mEnterButton.setOnClickListener(this);
 
 		// (per ora inizializzato così in attesa del lavoro aggiornato dell'app in cui inserire,
@@ -89,8 +91,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(i);
     }
 
-    public static void setEnterButtonClickable(boolean bol){
-		mEnterButton.setBackgroundColor(bol?Color.DKGRAY:Color.RED);
-		mEnterButton.setClickable(bol);
+    public void setEnterButtonClickable(boolean bool){
+		mEnterButton.setBackgroundColor(bool?Color.DKGRAY:Color.RED);
+		mEnterButton.setClickable(bool);
 	}
 }

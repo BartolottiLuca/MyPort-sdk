@@ -28,7 +28,7 @@ public class ServiceUport extends AbstractService {
             account= (UportData) dataSet.getObject(Metadata.UPORTDATA_CONST);
         }catch (Exception e){  //dovrei farlo solo su illegal argument exception
             e.printStackTrace();
-            return new UportData(MainActivity.getAppContext());
+            return new UportData(MainActivity.getInstance());
         }
         return account;
     }
@@ -57,11 +57,8 @@ public class ServiceUport extends AbstractService {
             return false;
         ServiceUport other = (ServiceUport) obj;
         if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        return true;
+            return other.name == null;
+        } else return name.equals(other.name);
     }
 
     @Override

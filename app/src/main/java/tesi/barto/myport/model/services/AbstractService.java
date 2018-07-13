@@ -44,7 +44,7 @@ public abstract class AbstractService implements IService {
      * of the service considered.
      */
     @Override
-    public Object provideService(IUser user) throws FileNotFoundException, IOException {
+    public Object provideService(IUser user) throws IOException {
         OutputDataConsent outDataConsent = ConsentManager.askOutputDataConsent(user, this);
         IDataSet dataSet = myDataInstance.getDataSetForOutputDataConsent(outDataConsent);
         return this.concreteService(dataSet);
@@ -68,7 +68,7 @@ public abstract class AbstractService implements IService {
         return this.securityManager;
     }
 
-    protected abstract Object concreteService(IDataSet dataSet) throws FileNotFoundException, IOException;
+    protected abstract Object concreteService(IDataSet dataSet) throws IOException;
 
     /**
      * This method is called at the instantiation of the implementing object,

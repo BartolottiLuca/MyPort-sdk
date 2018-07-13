@@ -13,7 +13,7 @@ import java.util.Set;
 
 public interface IAccount {
 
-    public IService getService();
+    IService getService();
 
     /**
      * There can be only one ServiceConsent Active or Disabled at a time for a
@@ -22,13 +22,13 @@ public interface IAccount {
      * @return The only Active or Disabled ServiceConsent for
      *         this service, null otherwise.
      */
-    public ServiceConsent getActiveDisabledSC();
+    ServiceConsent getActiveDisabledSC();
 
-    public Set<ServiceConsent> getAllServiceConsents();
+    Set<ServiceConsent> getAllServiceConsents();
 
-    public void addDataConsent(DataConsent dataConsent);
+    void addDataConsent(DataConsent dataConsent);
 
-    public void addServiceConsent(ServiceConsent serviceConsent);
+    void addServiceConsent(ServiceConsent serviceConsent);
 
-    public List<DataConsent> getAllDataConsents(ServiceConsent sc);
+    List<DataConsent> getAllDataConsents(ServiceConsent sc);
 }

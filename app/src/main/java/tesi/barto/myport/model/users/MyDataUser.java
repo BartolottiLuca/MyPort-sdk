@@ -133,11 +133,8 @@ public class MyDataUser implements IUser {
             return false;
         MyDataUser other = (MyDataUser) obj;
         if (emailAddress == null) {
-            if (other.emailAddress != null)
-                return false;
-        } else if (!emailAddress.equals(other.emailAddress))
-            return false;
-        return true;
+            return other.emailAddress == null;
+        } else return emailAddress.equals(other.emailAddress);
     }
 
     @Override

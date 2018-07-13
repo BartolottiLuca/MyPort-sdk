@@ -1,10 +1,10 @@
 package tesi.barto.myport.Uport
 
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.widget.Button
 import android.widget.Switch
+import com.google.android.gms.tasks.SuccessContinuation
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 import me.uport.sdk.Uport
@@ -13,6 +13,7 @@ import me.uport.sdk.extensions.*
 import me.uport.sdk.fuelingservice.FuelTokenProvider
 import me.uport.sdk.identity.Account
 import me.uport.sdk.jsonrpc.JsonRPC
+import org.slf4j.helpers.Util
 import tesi.barto.myport.activities.MainActivity
 import tesi.barto.myport.activities.NewAccountActivity
 import tesi.barto.myport.activities.UserProfileActivity
@@ -22,9 +23,13 @@ import tesi.barto.myport.model.consents.ServiceConsent
 import tesi.barto.myport.model.registry.Metadata
 import tesi.barto.myport.model.services.IService
 import tesi.barto.myport.model.users.IUser
+import java.lang.reflect.Method
+import java.util.*
+import java.util.concurrent.Callable
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 class UportData () {
-    private var con: Context = MainActivity.getAppContext()
+    private var con: Context = MainActivity.getInstance()
     private var uportError: String = ""
     private var uportA: Account = Account.blank
     private var accountSetted: Boolean = false
@@ -32,8 +37,8 @@ class UportData () {
     private var receiptSetted: Boolean = false
     private var job: Job? = null
 
-    constructor(applicationContext: Context) : this() {
-        con = applicationContext
+    constructor(MainActivityInstance: Context) : this() {
+        con = MainActivityInstance
         if (Uport.defaultAccount == null) {
             val config = Uport.Configuration().setApplicationContext(con).setFuelTokenProvider(FuelTokenProvider(con, "2ouNYyHP1yLjfVM4mVdYKwx3jGEUgpQHBya"))
             Uport.initialize(config)
@@ -41,7 +46,7 @@ class UportData () {
                 // update UI to reflect the existence of a defaultAccount
                 if (err == null) {
                     this.setAccount(account)
-                    MainActivity.setEnterButtonClickable(true)
+                    (con as MainActivity).setEnterButtonClickable(true)
                 } else {
                     uportError = "ERROR: $err."
                 }
@@ -93,6 +98,45 @@ class UportData () {
         this.receiptSetted = true
     }
 
+    fun sendTransaction(callingclass:Context,transactionString:String, onSuccess: Method, onFailure: Method) {
+        launch { launch {
+            if (accountSetted && (job==null || (job as Job).isCompleted)) {
+                var str = transactionString
+                receipit = null
+                receiptSetted = false
+                uportA.send(con, getAccount()?.proxyAddress as String, str.toByteArray()) { err, txHash ->
+                    if (err == null) {
+                        job = Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
+                            if (err == null) {
+                                setReceipt(receipt)
+                                onSuccess.invoke(callingclass)
+                                /*
+                                UserProfileActivity.setButtonClickable("DisableButton", true)
+                                UserProfileActivity.setButtonClickable("WithdrawButton", true)
+                                */
+                            } else {
+                                uportError = "" + err
+                                onFailure.invoke(callingclass)
+                                //UserProfileActivity.setButtonClickable("ServiceButton", true)
+                            }
+                        }
+                    } else {
+                        uportError = "" + err
+                        onFailure.invoke(callingclass)
+                        // UserProfileActivity.setButtonClickable("ServiceButton", true)
+                    }
+                }.join()
+            } else {
+                receipit = null
+                receiptSetted = false
+                onFailure.invoke(callingclass)
+                //UserProfileActivity.setButtonClickable("ServiceButton", true)
+            }
+        } }
+    }
+
+
+
     fun addService(controller: IController, service: IService, newAccountActivity: NewAccountActivity) {
         launch { launch {
                if (accountSetted && (job==null || (job as Job).isCompleted)) {
@@ -104,28 +148,27 @@ class UportData () {
                            job = Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
                                if (err == null) {
                                    setReceipt(receipt)
-                                   controller.addService(service) // se ci arrivo da DataConsentActivity e ho già l'account settato espode tutto, giustamente.
-                                   newAccountActivity.onConfirmedService()
+                                   //newAccountActivity.onConfirmedService(controller, service)
                                    /*
                                    UserProfileActivity.setButtonClickable("DisableButton", true)
                                    UserProfileActivity.setButtonClickable("WithdrawButton", true)
                                    */
                                } else {
                                    uportError = "" + err
-                                   newAccountActivity.onFailureService()
+                                   newAccountActivity.onFailedService()
                                    //UserProfileActivity.setButtonClickable("ServiceButton", true)
                                }
                            }
                        } else {
                            uportError = "" + err
-                           newAccountActivity.onFailureService()
+                           newAccountActivity.onFailedService()
                            // UserProfileActivity.setButtonClickable("ServiceButton", true)
                        }
                    }.join()
                } else {
                    receipit = null
                    receiptSetted = false
-                   newAccountActivity.onFailureService()
+                   newAccountActivity.onFailedService()
                    //UserProfileActivity.setButtonClickable("ServiceButton", true)
                }
         } }
@@ -156,18 +199,18 @@ class UportData () {
                                 user.addDataConsent(outputDataConsent, service)
                             } else {
                                 uportError = "" +err
-                                activity.checkSwitch(switch,!switch.isChecked)
+                                //activity.checkSwitch(switch,!switch.isChecked)
                             }
                         }
                     } else {
                         uportError = "" + err
-                        activity.checkSwitch(switch,!switch.isChecked)
+                        //activity.checkSwitch(switch,!switch.isChecked)
                     }
                 }.join()
             } else {
                 receipit = null
                 receiptSetted = false
-                activity.checkSwitch(switch,!switch.isChecked)
+                //activity.checkSwitch(switch,!switch.isChecked)
             }
         } }
     }
@@ -219,7 +262,7 @@ class UportData () {
         launch { launch {
             if (accountSetted && (job==null || (job as Job).isCompleted)) {
                 var str = "Verrà "
-                if (button.getText().toString().contains("Disabilita")){
+                if (button.text.toString().contains("Disabilita")){
                     str +="abilitato "
                 }else{
                     str +="disabilitato "
@@ -232,17 +275,17 @@ class UportData () {
                     if (err == null) {
                         job = Networks.rinkeby.awaitConfirmation(txHash) { err, receipt ->
                             if (err == null) {
-                                if (button.getText().toString().contains("Disabilita"))
+                                if (button.text.toString().contains("Disabilita"))
                                 {
                                     controller.toggleStatus(service, false)
-                                    button.setText("Abilita\n" + "consenso")
-                                    activity.checkSwitch(mLocationSwitch,false)
-                                    activity.checkSwitch(mOtherSwitch,false)
+                                    button.text = "Abilita\n" + "consenso"
+                                    //activity.checkSwitch(mLocationSwitch,false)
+                                    //activity.checkSwitch(mOtherSwitch,false)
                                 }else{
                                     controller.toggleStatus(service, true)
-                                    button.setText("Disabilita\n" + "consenso")
-                                    activity.checkSwitch(mLocationSwitch,true)
-                                    activity.checkSwitch(mOtherSwitch,true)
+                                    button.text = "Disabilita\n" + "consenso"
+                                    //activity.checkSwitch(mLocationSwitch,true)
+                                    //activity.checkSwitch(mOtherSwitch,true)
                                 }
                                 UserProfileActivity.setButtonClickable("DisableButton", true)
                             } else {

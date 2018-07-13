@@ -24,7 +24,7 @@ public class ServiceProva extends AbstractService {
 
 	// ??????????????
 	@Override
-	protected Object concreteService(IDataSet dataSet) throws FileNotFoundException, IOException {
+	protected Object concreteService(IDataSet dataSet) {
 		return null;
 	}
 
@@ -58,12 +58,9 @@ public class ServiceProva extends AbstractService {
 			return false;
 		ServiceProva other = (ServiceProva) obj;
 		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		return true;
-	}
+            return other.name == null;
+		} else return name.equals(other.name);
+    }
 
 	@Override
 	public String toString() {

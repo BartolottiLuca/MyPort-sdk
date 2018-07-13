@@ -16,18 +16,18 @@ import java.util.Date;
 
 public interface IMyData {
 
-    public IUser loginUser(String email, char[] password);
+    IUser loginUser(String email, char[] password);
 
-    public IUser createMyDataAccount(String firstName, String lastName, Date dateOfBirth, String emailAddress,
-                                     char[] password, Context context);
+    IUser createMyDataAccount(String firstName, String lastName, Date dateOfBirth, String emailAddress,
+                              char[] password, Context context);
 
-    public IDataSet getDataSetForOutputDataConsent(OutputDataConsent outputDataConsent);
+    IDataSet getDataSetForOutputDataConsent(OutputDataConsent outputDataConsent);
 
-    public void saveDataSet(IDataSet dataSet, InputDataConsent inDataConsent);
+    void saveDataSet(IDataSet dataSet, InputDataConsent inDataConsent);
 
-    public void issueNewServiceConsent(IService selectedService, IUser authenticatedUser);
+    void issueNewServiceConsent(IService selectedService, IUser authenticatedUser);
 
-    public void createServiceAccount(IUser user, IService service);
+    void createServiceAccount(IUser user, IService service);
 
 }
 

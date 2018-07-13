@@ -31,7 +31,7 @@ public class PersonalDataVault implements IPersonalDataVault {
         String fileName = "DatiProva.txt";
         int result = 0;
         try {
-            AssetManager assetManager = MainActivity.getAppContext().getResources().getAssets();
+            AssetManager assetManager = MainActivity.getInstance().getResources().getAssets();
             InputStream inputStream = assetManager.open(fileName);
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String line;
@@ -51,7 +51,7 @@ public class PersonalDataVault implements IPersonalDataVault {
         String fileName = "DatiProva.txt";
         String result = new String();
         try {
-            AssetManager assetManager = MainActivity.getAppContext().getResources().getAssets();
+            AssetManager assetManager = MainActivity.getInstance().getResources().getAssets();
             InputStream inputStream = assetManager.open(fileName);
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String line;
@@ -71,7 +71,7 @@ public class PersonalDataVault implements IPersonalDataVault {
         String fileName = "Account.json";
         UportData result=null;
         try{ //thanks to StackOverflow
-            AssetManager assetManager = MainActivity.getAppContext().getResources().getAssets();
+            AssetManager assetManager = MainActivity.getInstance().getResources().getAssets();
             InputStream inputStream = assetManager.open(fileName);
             //to get the content of the file as String
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -81,14 +81,14 @@ public class PersonalDataVault implements IPersonalDataVault {
                 out.append(line);
             }
             reader.close();
-            result= new UportData(MainActivity.getAppContext(),out.toString());
+            result= new UportData(MainActivity.getInstance(),out.toString());
 
         } catch (Exception e) {
             e.printStackTrace();
-            result=new UportData(MainActivity.getAppContext());
+            result=new UportData(MainActivity.getInstance());
         }
         //if (result==null)
-            //result=new UportData(MainActivity.getAppContext());
+            //result=new UportData(MainActivity.getInstance());
         return result;
     }
 

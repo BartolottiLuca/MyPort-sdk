@@ -61,11 +61,8 @@ public class DataConsent implements IConsent {
             return false;
         DataConsent other = (DataConsent) obj;
         if (identifier == null) {
-            if (other.identifier != null)
-                return false;
-        } else if (!identifier.equals(other.identifier))
-            return false;
-        return true;
+            return other.identifier == null;
+        } else return identifier.equals(other.identifier);
     }
 
     @Override

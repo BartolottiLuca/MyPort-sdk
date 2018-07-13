@@ -20,7 +20,7 @@ public class DataConsentActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_data_consent);
 
-		mConsentTextView = (TextView) findViewById(R.id.tv_dataconsent);
+		mConsentTextView = findViewById(R.id.tv_dataconsent);
 
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

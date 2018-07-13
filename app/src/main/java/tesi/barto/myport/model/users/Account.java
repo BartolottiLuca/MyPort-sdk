@@ -52,11 +52,8 @@ class Account implements IAccount {
             return false;
         Account other = (Account) obj;
         if (service == null) {
-            if (other.service != null)
-                return false;
-        } else if (!service.equals(other.service))
-            return false;
-        return true;
+            return other.service == null;
+        } else return service.equals(other.service);
     }
 
     @Override

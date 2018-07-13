@@ -1,5 +1,10 @@
 package tesi.barto.myport.activities;
 
+/**
+ * Edited by Luca Bartolotti on 12/07/2018.
+ */
+
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,12 +26,14 @@ import tesi.barto.myport.controller.MyController;
 import tesi.barto.myport.model.MyData.MyData;
 import tesi.barto.myport.model.consents.ServiceConsent;
 import tesi.barto.myport.model.services.AbstractService;
+import tesi.barto.myport.model.services.IService;
 import tesi.barto.myport.model.services.ServiceProva;
 import tesi.barto.myport.model.services.ServiceUport;
 import tesi.barto.myport.model.users.IUser;
 import tesi.barto.myport.utilities.VoiceSupport;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Locale;
 
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
@@ -42,6 +49,8 @@ public class NewAccountActivity extends AppCompatActivity implements View.OnClic
 
 	private NewAccountActivity instance=null;
 
+	private ServiceUport serviceUport;
+    private ServiceProva serviceProva;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -49,7 +58,7 @@ public class NewAccountActivity extends AppCompatActivity implements View.OnClic
 
 		this.instance=this;
 
-		mNewAccountButton = (ImageButton) findViewById(R.id.button_add);
+		mNewAccountButton = findViewById(R.id.button_add);
 		mNewAccountButton.setOnClickListener(this);
 
 
@@ -126,12 +135,9 @@ public class NewAccountActivity extends AppCompatActivity implements View.OnClic
 						// viene creato un account per l'utente
 						// vengo reindirizzato alla schermata di gestione dei consent
 						//  fare sì che tornando indietro dalla successiva schermata non si possa ritornare a questa (finish()?)
-						AbstractService serviceProva = new ServiceProva();
-						IController controller = new MyController();
-						controller.logInUser("nomecognome@prova.it", "password".toCharArray());
-
+						serviceProva = new ServiceProva();
 						//LUCA
-						AbstractService serviceUport = new ServiceUport();
+						serviceUport = new ServiceUport();
 						UportData account;
 						IUser user = MyData.getInstance().loginUser("nomecognome@prova.it", "password".toCharArray());
 						ServiceConsent userSC = user.getActiveSCForService(serviceUport);
@@ -139,12 +145,19 @@ public class NewAccountActivity extends AppCompatActivity implements View.OnClic
 							account=(UportData) userSC.getService().provideService(user); //probabilmente non necessario
 						}catch (IOException e){
 							//ERRORE IO, probabilmente lettura file
-							account= new UportData(MainActivity.getAppContext());
+							account= new UportData(MainActivity.getInstance());
 						}
-						mNewAccountButton.setClickable(false);
-						mNewAccountButton.setBackgroundColor(Color.DKGRAY);
-
-						account.addService(controller,serviceProva,instance);
+						setAccountButtonClickable(false);
+                            try {
+                                Method onSuccess = NewAccountActivity.class.getMethod("onConfirmedService");
+                                Method onFailure = NewAccountActivity.class.getMethod("onFailedService");
+                                String trString="Sta per essere creato un nuovo account MyData per il servizio: "+serviceProva.toString();
+                                account.sendTransaction(instance,trString,onSuccess,onFailure);
+                            } catch (NoSuchMethodException e) {
+                                e.printStackTrace();
+                                onFailedService();
+                            }
+						//account.addService(controller,serviceProva,instance);
 						//FINE LUCA
 /*
 						controller.addService(serviceProva);
@@ -162,14 +175,21 @@ public class NewAccountActivity extends AppCompatActivity implements View.OnClic
 				.setNegativeButton("No",  new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						mNewAccountButton.setClickable(true);
-						mNewAccountButton.setBackgroundColor(Color.parseColor("#00897b"));
+						onFailedService();
 					}
 				})
 				.show();
 	}
 
+	public void setAccountButtonClickable(boolean bool){
+		mNewAccountButton.setBackgroundColor(bool?Color.parseColor("#00897b"):Color.DKGRAY);
+		mNewAccountButton.setClickable(bool);
+	}
+
 	public void onConfirmedService(){
+        IController controller = new MyController();
+        controller.logInUser("nomecognome@prova.it", "password".toCharArray());
+		controller.addService(serviceProva); // se ci arrivo da DataConsentActivity e ho già l'account settato espode tutto, giustamente.
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putBoolean("LocationConsent", true);
 		editor.commit();
@@ -180,8 +200,7 @@ public class NewAccountActivity extends AppCompatActivity implements View.OnClic
 		startActivity(i);
 	}
 
-	public void onFailureService() {
-		mNewAccountButton.setClickable(true);
-		mNewAccountButton.setBackgroundColor(Color.parseColor("#00897b"));
+	public void onFailedService() {
+		setAccountButtonClickable(true);
 	}
 }

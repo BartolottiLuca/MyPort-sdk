@@ -24,13 +24,13 @@ import java.io.IOException;
  */
 
 public interface IService {
-    public ISecurityManager getSecurityManager();
+    ISecurityManager getSecurityManager();
 
-    public boolean equals(Object obj);
+    boolean equals(Object obj);
 
-    public Object provideService(IUser user) throws FileNotFoundException, IOException;
+    Object provideService(IUser user) throws IOException;
 
-    public String toString();
+    String toString();
 
-    public void gatherData(IUser user, IDataSet dataSet);
+    void gatherData(IUser user, IDataSet dataSet);
 }

@@ -14,25 +14,25 @@ import java.util.List;
 
 public interface IUser {
 
-    public String getFirstName();
+    String getFirstName();
 
-    public void setFirstName(String firstName);
+    void setFirstName(String firstName);
 
-    public String getLastName();
+    String getLastName();
 
-    public void setLastName(String lastName);
+    void setLastName(String lastName);
 
-    public Date getDateOfBirth();
+    Date getDateOfBirth();
 
-    public void setDateOfBirth(Date dateOfBirth);
+    void setDateOfBirth(Date dateOfBirth);
 
-    public String getEmailAddress();
+    String getEmailAddress();
 
-    public void setEmailAddress(String emailAddress);
+    void setEmailAddress(String emailAddress);
 
-    public ISecurityManager getSecurityManager();
+    ISecurityManager getSecurityManager();
 
-    public int hashCode();
+    int hashCode();
 
     //public LoginUport getUport();
 
@@ -44,7 +44,7 @@ public interface IUser {
      * @param other
      * @return true if the email is the same, false otherwise.
      */
-    public boolean equals(Object other);
+    boolean equals(Object other);
 
     /**
      * This function creates a new Account for the service specified only if the
@@ -57,13 +57,13 @@ public interface IUser {
      * @throws IllegalArgumentException
      *             if the account already exists.
      */
-    public void newAccountAtService(IService service);
+    void newAccountAtService(IService service);
 
-    public List<IAccount> getAllAccounts();
+    List<IAccount> getAllAccounts();
 
-    public boolean checkIfPasswordEqual(char[] password);
+    boolean checkIfPasswordEqual(char[] password);
 
-    public boolean hasAccountAtService(IService service);
+    boolean hasAccountAtService(IService service);
 
     /**
      * This method returns the instance of ServiceConsent which has Active
@@ -76,12 +76,12 @@ public interface IUser {
      * @return the corresponding ServiceConsent if there is one with Active
      *         status, null otherwise.
      */
-    public ServiceConsent getActiveSCForService(IService service);
+    ServiceConsent getActiveSCForService(IService service);
 
-    public void addDataConsent(DataConsent dataConsent, IService service);
+    void addDataConsent(DataConsent dataConsent, IService service);
 
-    public void addServiceConsent(IService selectedService);
+    void addServiceConsent(IService selectedService);
 
-    public IPersonalDataVault getPersonalDataVault();
+    IPersonalDataVault getPersonalDataVault();
 
 }

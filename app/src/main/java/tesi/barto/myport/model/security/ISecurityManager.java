@@ -7,9 +7,9 @@ package tesi.barto.myport.model.security;
 import java.security.PublicKey;
 
 public interface ISecurityManager {
-    public byte[] sign(byte[] toSign);
+    byte[] sign(byte[] toSign);
 
-    public boolean verify(PublicKey pubKey, byte[] toUpdate, byte[] toVerify);
+    boolean verify(PublicKey pubKey, byte[] toUpdate, byte[] toVerify);
 
-    public PublicKey getPublicKey();
+    PublicKey getPublicKey();
 }

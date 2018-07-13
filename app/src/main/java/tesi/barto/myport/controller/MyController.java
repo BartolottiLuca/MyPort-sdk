@@ -82,7 +82,6 @@ public class MyController implements IController {
 			//TODO WTF
 			IService sp = new ServiceProva();
 			this.myDataInstance.createServiceAccount(authenticatedUser, sp);
-			//cose a caso!
 		}
 	}
 
@@ -104,7 +103,7 @@ public class MyController implements IController {
 	public boolean getADStatusForService(IService selectedService) {
 		for (IAccount a : authenticatedUser.getAllAccounts())
 			if (a.getService().equals(selectedService))
-				return a.getActiveDisabledSC().getConsentStatus() == ConsentStatus.ACTIVE ? true : false;
+				return a.getActiveDisabledSC().getConsentStatus() == ConsentStatus.ACTIVE;
 		throw new IllegalArgumentException("Current user does not have an Active or Disabled account to the " + selectedService.toString() + " service.");
 	}
 
